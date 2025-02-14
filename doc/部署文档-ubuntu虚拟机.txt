@@ -30,9 +30,11 @@ docker部署应用
 注意：桥接网络ip地址不要和其他应用冲突
 
 docker-compose启动doris
-（1）配置/etc/sysctl.conf，file_max_count,禁用swap等等
+启动之前这些准备要做好
+（1）配置/etc/sysctl.conf，max_map_count
+（2）禁用swap
+等等
 
 docker启动mysql
 
-docker-compose启动redis
-
+docker-compose启动kafka（单节点，后面可以考虑缓存docker命令）
