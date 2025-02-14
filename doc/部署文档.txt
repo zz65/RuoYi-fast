@@ -152,6 +152,8 @@ sudo docker tag confluentinc/cp-kafka:7.7.1 registry.cn-hangzhou.aliyuncs.com/ex
 --redis
 sudo docker tag redis:6.0 registry.cn-hangzhou.aliyuncs.com/examine_1/redis:6.0
 
+--mysql
+sudo docker tag container-registry.oracle.com/mysql/community-server:8.0 registry.cn-hangzhou.aliyuncs.com/examine_1/mysql_community-server:8.0
 
 3)上传镜像
 sudo docker push registry.cn-hangzhou.aliyuncs.com/examine_1/doris-fe:2.1.6
@@ -166,6 +168,9 @@ sudo docker push registry.cn-hangzhou.aliyuncs.com/examine_1/confluentinc_cp-kaf
 
 --redis
 sudo docker push registry.cn-hangzhou.aliyuncs.com/examine_1/redis:6.0
+
+--mysql
+sudo docker push registry.cn-hangzhou.aliyuncs.com/examine_1/mysql_community-server:8.0
 
 4)拉取镜像（其他服务器使用）
 sudo docker pull registry.cn-hangzhou.aliyuncs.com/examine_1/doris-fe:2.1.6
@@ -332,28 +337,21 @@ SELECT * FROM users;
 -- 查看整个集群的分片分布情况
 SHOW PARTITIONS FROM testdb.users;
 
---创建车联网数据库1
-CREATE DATABASE iov;
-use iov;
+--创建演示数据库
+CREATE DATABASE demo;
+use demo;
 
---创建车联网数据库2
-CREATE DATABASE vehicle;
-use vehicle;
+-- 创建电焊机用户 ew
+CREATE USER 'ew'@'%' IDENTIFIED BY '1234';
+alter user 'ew'@'%' IDENTIFIED BY '1234';
 
---生产 admin 用户 密码不在这里记录
+--授权iov库给电焊机用户
+GRANT ALL ON demo.* TO 'ew'@'%';
 
---本地虚拟机 local 用户
-CREATE USER 'local'@'%' IDENTIFIED BY '1234';
-alter user 'local'@'%' IDENTIFIED BY '1234';
-
---授权iov库给用户
-GRANT ALL ON iov.* TO 'local'@'%';
---授权vehicle库给用户
-GRANT ALL ON vehicle.* TO 'local'@'%';
 -- 查看用户连接数
-SHOW PROPERTY FOR 'local' LIKE '%max_user_connections%';
+SHOW PROPERTY FOR 'ew' LIKE '%max_user_connections%';
 -- 设置连接数,默认100，doris群给了10000。测试环境先搞1000试试，生产搞10000试试
-SET PROPERTY FOR 'local' 'max_user_connections' = '1000';
+SET PROPERTY FOR 'ew' 'max_user_connections' = '1000';
 
 
 2.mysql
@@ -367,7 +365,8 @@ sudo docker run -d -p 33306:3306 --name mysql8 \
 -v /data/mysql/conf:/etc/mysql/conf.d \
 -e MYSQL_ROOT_PASSWORD=1234 \
 -e TZ=Asia/Shanghai \
-container-registry.oracle.com/mysql/community-server:8.0
+registry.cn-hangzhou.aliyuncs.com/examine_1/mysql_community-server:8.0
+#container-registry.oracle.com/mysql/community-server:8.0
 
 #获取mysql交互式终端，进入mysql,输入用户名密码
 sudo docker exec -it mysql8 /bin/bash
@@ -389,15 +388,15 @@ select now();
 
 --创建数据库,创建用户和密码,给用户授权
 show databases;
-create database iov;
-use iov;
+create database demo;
+use demo;
 
 --ALTER USER 'root'@'localhost' IDENTIFIED BY '';
 
-CREATE USER 'iov'@'%' IDENTIFIED BY 'Guozu1@7';
-GRANT ALL ON iov.* TO 'iov'@'%';
+CREATE USER 'ew'@'%' IDENTIFIED BY '1234';
+GRANT ALL ON demo.* TO 'ew'@'%';
 --
-sudo docker exec -it mysql8 mysql -uiov -p
+sudo docker exec -it mysql8 mysql -uew -p
 
 3.redis cluster
 配置文件使用Docker Compose部署一个包含3个节点的redis cluster，并配置为使用自定义IPv4网络
@@ -464,9 +463,6 @@ sudo chown -R ubuntu:ubuntu /data/kafka*
 sudo docker-compose -f docker-compose-kafka.yaml down
 sudo docker-compose -f docker-compose-kafka.yaml up -d --remove-orphans
 
---看ip
-sudo apt install net-tools
-ifconfig
 
 --查看日志
 sudo docker logs --tail 50 -f kafka1
