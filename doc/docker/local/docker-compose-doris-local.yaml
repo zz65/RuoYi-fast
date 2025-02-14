@@ -1,0 +1,81 @@
+
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+version: '3'
+services:
+  doris-fe-01:
+#    image: "apache/doris:doris-fe-2.1.7"
+    image: "registry.cn-hangzhou.aliyuncs.com/examine_1/apache-doris:doris-fe-2.1.7"
+    container_name: "doris-fe-01"
+    hostname: "fe-01"
+    environment:
+      - TZ=Asia/Shanghai
+      - FE_SERVERS=fe1:172.20.80.2:9010
+      - FE_ID=1
+      - PRIORITY_NETWORKS=doris_net
+    ports:
+      - 8031:8030
+      - 9031:9030
+      - 9021:9020
+      - 8051:8050
+      - 9011:9010
+    volumes:
+      - /data/fe-01/doris-meta:/opt/apache-doris/fe/doris-meta
+      - /data/fe-01/log:/opt/apache-doris/fe/log
+      - /data/fe-01/conf/fe.conf:/opt/apache-doris/fe/conf/fe.conf
+    networks:
+      doris_net:
+        ipv4_address: 172.20.80.2
+
+  doris-be-01:
+#    image: "apache/doris:doris-be-2.1.7"
+    image: "registry.cn-hangzhou.aliyuncs.com/examine_1/apache-doris:doris-be-2.1.7"
+    container_name: "doris-be-01"
+    hostname: "be-01"
+    depends_on:
+      - doris-fe-01
+    environment:
+      - TZ=Asia/Shanghai
+      - FE_SERVERS=fe1:172.20.80.2:9010
+      - BE_ADDR=172.20.80.5:9050
+      - BE_HOST=doris-be-01
+      - PRIORITY_NETWORKS=doris_net
+    ports:
+      - 8041:8041
+      - 8061:8061
+      - 9061:9061
+      - 9051:9050
+    volumes:
+      - /data/be-01/storage:/opt/apache-doris/be/storage
+      - /data/be-01/script:/docker-entrypoint-initdb.d
+      - /data/be-01/log:/opt/apache-doris/be/log
+      - /data/be-01/conf/be.conf:/opt/apache-doris/be/conf/be.conf
+    networks:
+      doris_net:
+        ipv4_address: 172.20.80.5
+networks:
+  doris_net:
+    ipam:
+      config:
+        - subnet: 172.20.80.0/24
+
+##注意！！！！！！！ 本地虚拟机使用此docker网桥模式部署，添加backend的ip和port建议用宿主机ip和port，否则flink-doris-connector无法插入数据到doris
+##查看be节点
+#show backends;
+## 本地要使用宿主机ip
+#ALTER SYSTEM DROPP BACKEND "172.20.80.5:9050"
+#ALTER SYSTEM ADD BACKEND "192.168.0.101:9051";

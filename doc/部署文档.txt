@@ -171,8 +171,8 @@ sudo docker push registry.cn-hangzhou.aliyuncs.com/examine_1/redis:6.0
 sudo docker pull registry.cn-hangzhou.aliyuncs.com/examine_1/doris-fe:2.1.6
 sudo docker pull registry.cn-hangzhou.aliyuncs.com/examine_1/doris-be:2.1.6
 
-sudo docker pull registry.cn-hangzhou.aliyuncs.com/examine_1/apache/doris:doris-fe-2.1.7
-sudo docker pull registry.cn-hangzhou.aliyuncs.com/examine_1/apache/doris:doris-be-2.1.7
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/examine_1/apache-doris:doris-fe-2.1.7
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/examine_1/apache-doris:doris-be-2.1.7
 
 --kafka
 sudo docker pull registry.cn-hangzhou.aliyuncs.com/examine_1/confluentinc_cp-kafka:7.7.1

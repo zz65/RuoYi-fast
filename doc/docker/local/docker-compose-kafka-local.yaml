@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  kafka1:
+    image: registry.cn-hangzhou.aliyuncs.com/examine_1/confluentinc_cp-kafka:7.7.1
+    container_name: kafka1
+    networks:
+      kafka-net:
+        ipv4_address: 172.16.0.2
+    ports:
+      - "9094:9092"
+    volumes:
+      - /data/kafka-node-1:/data
+    environment:
+      KAFKA_KRAFT_MODE: "true"
+      KAFKA_BROKER_ID: 1
+      KAFKA_CLUSTER_ID: e62ecd2d-3c19-4430-a6ac-bedbd8d70fe9
+      CLUSTER_ID: e62ecd2d-3c19-4430-a6ac-bedbd8d70fe9
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka1:9093,2@kafka2:9093,3@kafka3:9093"
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LISTENERS: "INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:19092,CONTROLLER://0.0.0.0:9093"
+      KAFKA_ADVERTISED_LISTENERS: "INTERNAL://192.168.0.101:9094,EXTERNAL://192.168.0.101:9094"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_LOG_DIRS: "/data"
+      KAFKA_CONTROLLER_QUORUM: "1"
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+      KAFKA_HEAP_OPTS: "-Xms128m -Xmx256m"
+networks:
+  kafka-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.0.0/24
