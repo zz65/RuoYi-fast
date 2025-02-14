@@ -27,7 +27,8 @@
         </div>
         <a th:href="@{/index}">
             <li class="logo hidden-xs">
-                <span class="logo-lg">RuoYi</span>
+                <!--<span class="logo-lg">RuoYi</span>-->
+                <span class="logo-lg">设备管理系统</span>
             </li>
          </a>
         <div class="sidebar-collapse tab-content" id="side-menu">
@@ -249,7 +250,9 @@
 				</div>
                 <!-- 右侧栏 -->
                 <ul class="nav navbar-top-links navbar-right welcome-message">
+<!--
                     <li><a data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="开发文档" href="http://doc.ruoyi.vip/ruoyi" target="_blank"><i class="fa fa-question-circle"></i> 文档</a></li>
+-->
                     <li><a data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="锁定屏幕" href="javascript:;" id="lockScreen"><i class="fa fa-lock"></i> 锁屏</a></li>
 	                <li><a data-toggle="tooltip" data-trigger="hover" data-placement="bottom" title="全屏显示" href="javascript:;" id="fullScreen"><i class="fa fa-arrows-alt"></i> 全屏</a></li>
                 
@@ -308,7 +311,8 @@
         </div>
         
         <div th:if="${footer}" class="footer">
-            <div class="pull-right">© [[${copyrightYear}]] RuoYi Copyright </div>
+            <!--<div class="pull-right">© [[${copyrightYear}]] RuoYi Copyright </div>-->
+            <div class="pull-right">© [[${copyrightYear}]] XXX Copyright </div>
         </div>
     </div>
     <!--右侧部分结束-->
