@@ -1,0 +1,38 @@
+一、安装，破解
+按照csdn安装虚拟机15.5，破解虚拟机
+
+二、配置虚拟机和操作系统
+1.官网下载对应的ubuntu22.04版本的server版本镜像
+2.新建虚拟机,配置：桥接网络，磁盘50g, 内存5g,核心2，每个核心2个处理器，总处理器4
+3.安装操作系统：记得勾选安装open SSH server
+4.服务器启动ssh服务,修改配置为允许密码登录，并重启ssh服务
+sudo systemctl start ssh
+sudo systemctl status ssh
+
+sudo nano /etc/ssh/sshd_config
+    # 允许密码验证
+    PasswordAuthentication yes
+    # 允许使用 root 用户登录（谨慎使用）
+    PermitRootLogin yes
+
+sudo systemctl restart ssh
+
+5.用ssh客户端连接服务器
+6.操作系统配置：挂载磁盘，分区。磁盘、文件系统、分区、逻辑卷扩容。
+（1）禁用swap、ipv6
+（2）开启ipv4,否则挂起虚拟机再恢复，网络将不可用
+vi /usr/lib/sysctl.d//00-system.conf
+添加内容:  net.ipv4.ip_forward = 1 ,然后 esc :wq 保存
+systemctl restart network
+
+三、应用部署
+docker部署应用
+注意：桥接网络ip地址不要和其他应用冲突
+
+docker-compose启动doris
+（1）配置/etc/sysctl.conf，file_max_count,禁用swap等等
+
+docker启动mysql
+
+docker-compose启动redis
+

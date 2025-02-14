@@ -1,0 +1,254 @@
+日常运维:
+#查看服务器常规指标
+top命令
+#参考文章：https://blog.csdn.net/zhezhebie/article/details/142336260
+#按键（区分大小写）：
+#按h显示帮助展示
+#按e键可以更改内存和交换空间的显示单位
+#按c键查看完整命令行。可以看进程具体是哪个程序
+#按M按照内存排序，按P按照cpu排序
+#按数字1键查看每个逻辑核心cpu利用率
+#作用：查看资源消耗：负载，cpu,mem。
+#字段说明：
+#load average:是指过去1分钟、5分钟、15分钟的平均负载。
+#us：用户空间占用CPU的百分比（user space）。
+#sy：内核空间占用CPU的百分比（system）。
+#id：空闲CPU百分比（idle）。
+#wa：等待输入输出的CPU时间百分比（iowait）
+
+
+#查看连接数和tcp连接数
+netstat -an|wc -l
+netstat -an|grep tcp |wc -l
+#磁盘io
+#查看所有 iostat -xz n。n是间隔秒数
+iostat -xz 1
+iostat -xz 2
+#查看特定磁盘
+iostat -d /vdb/vdb1 2
+
+
+mysql问题:
+# 1.遇到死锁问题
+# 登录服务器，使用root账户进入mysql命令行
+docker exec -it mysql8 mysql -uroot -p
+# 查看打开的表和锁定状态：
+SHOW OPEN TABLES WHERE In_use > 0;
+# 查看事务
+select * from information_schema.INNODB_TRX;
+# 如果有存在事务，并且处于Running状态，确定是这个事务id，那么杀死这个事务对应的 trx_mysql_thread_id
+# trx_mysql_thread_id对应 SHOW PROCESSLIST 里的id字段,使用kill命令杀死即可
+kill [trx_mysql_thread_id 字段对应的值]
+
+
+关闭swap分区:
+为了性能需要，需要关闭swap
+
+#===== 临时关闭 start =====
+#禁用当前的swap
+swapoff -a
+sysctl -p
+
+#确认全部禁用
+swapon --show
+#===== 临时关闭 end =====
+
+
+#====== 永久关闭 start =====
+#修改系统参数
+echo "vm.swappiness = 0">> /etc/sysctl.conf
+echo "vm.max_map_count = 2000000">> /etc/sysctl.conf
+sysctl -w vm.max_map_count=2000000
+sysctl -p
+#确认参数已经被写进配置文件
+cat /etc/sysctl.conf
+
+#关闭透明大页
+echo madvise > /sys/kernel/mm/transparent_hugepage/enabled
+echo madvise > /sys/kernel/mm/transparent_hugepage/defrag
+#确认参数已经被写进配置文件
+cat /sys/kernel/mm/transparent_hugepage/enabled
+cat /sys/kernel/mm/transparent_hugepage/defrag
+
+#修改磁盘文件
+cat /etc/fstab
+vim /etc/fstab
+#注释掉 /etc/fstab中的swap相关行，比如
+#/dev/disk/by-uuid/7c15dadf-178b-4842-b6ea-5d4dd36dba7d none swap sw 0 0
+#/swap.img      none    swap    sw      0       0
+#确认已经删除文件
+
+cat /proc/swaps
+#Filename        Type		Size		Used		Priority
+#/swapfile        file		2097148		1025792		-2
+
+swapoff /swapfile
+rm /swapfile
+
+cat /proc/swaps
+#Filename        Type		Size		Used		Priority
+
+systemctl list-unit-files | grep swap
+#swap.img.swap                              generated       -
+#swap.target                                    static          -
+
+systemctl list-unit-files --type=swap
+#UNIT FILE     STATE     VENDOR PRESET
+#swap.img.swap generated -
+
+systemctl mask swap.img.swap
+#Created symlink /etc/systemd/system/swap.img.swap → /dev/null.
+
+systemctl list-unit-files | grep swap
+#swap.img.swap                              masked          enabled
+#swap.target                                static          -
+
+#重启才生效
+reboot
+
+#确认
+free -h
+#上面命令再敲一遍，如果没有swap字眼或者swap被masked,就说明成功了
+
+#====== 永久关闭 end =====
+
+
+关闭ipv6:
+#====== 关闭ipv6 start =====
+#临时关闭
+sysctl -w net.ipv6.conf.all.disable_ipv6=1
+sysctl -w net.ipv6.conf.default.disable_ipv6=1
+sysctl -w net.ipv6.conf.lo.disable_ipv6=1
+sysctl -p
+#确认
+ip a
+
+#永久关闭
+sudo vim /etc/sysctl.conf
+#添加内容
+net.ipv6.conf.all.disable_ipv6=1
+net.ipv6.conf.default.disable_ipv6=1
+net.ipv6.conf.lo.disable_ipv6=1
+sysctl -p
+#重启才生效
+reboot
+
+#确认，如果没有 inet6 地址，则表示系统的网络接口上没有启用 IPv6 地址。
+ip a
+
+#====== 关闭ipv6 end =====
+
+
+
+应用程序问题排查:
+#通过doris-manager监控和部署doris
+#查看应用的日志
+cd /data/app
+#查看滚动日志
+tail -n222 -f xxx.log
+
+#关键字搜索日志，并支持翻页，向后翻页按空格/space,向前翻页按b。退出按q
+#查询异常信息
+grep -A1 'Caused by' /data/app/admin.log | less
+grep -A1 'Caused by' /data/app/logs/admin-error.2024-12-08.log | less
+grep -A1 'Exception' /data/app/logs/admin-error.2024-12-08.log | less
+#查看持久化错误
+grep -A1 'org.apache.ibatis.exceptions.PersistenceException' /data/app/admin.log | less
+grep -A1 'org.apache.ibatis.exceptions.PersistenceException' /data/app/logs/admin-error.2024-12-08.log | less
+#查询慢sql
+grep -A1 'SlowQuery' /data/app/admin.log |less
+grep -A1 'Failed to' /data/app/admin.log |less
+# 查看香农熵算法分数
+grep -C1 'shannonEntropyAlgorithm calcalate' /data/app/admin.log.8800 |less
+# 查看提交offset是否有异常
+grep -C1 'Offset Commit' /data/app/admin.log.8800 |less
+grep -C1 'offset' /data/app/admin.log.8800 |less
+grep -C1 'handleAlarmAlgorithmCalculateEvent cost' /data/app/admin.log.8800 |less
+# 查看电池soh日志
+grep -A0 'checkDateTime' /data/app/admin.log.8800 |less
+grep -A0 'soh' /data/app/admin.log.8800 |less
+grep -A0 '建议更换电池' /data/app/admin.log.8800 |less
+
+#统计实时上报命令的条数、成功解析的命令的条数、计kafka发送总次数、kafka发送成功次数
+grep -c 'parseUpJson CommandType:REALTIME_DATA_REPORTING' /data/app/logs/data-gateway-info.2024-12-09.log
+grep -c 'doBusiness CommandType:REALTIME_DATA_REPORTING' /data/app/logs/data-gateway-info.2024-12-09.log
+grep -c 'kafka send message' /data/app/logs/data-gateway-info.2024-12-09.log
+grep -c 'kafka send success' /data/app/logs/data-gateway-info.2024-12-09.log
+#nohup日志
+grep -c 'parseUpJson CommandType:REALTIME_DATA_REPORTING' /data/app/data-gateway.log
+grep -c 'doBusiness CommandType:REALTIME_DATA_REPORTING' /data/app/data-gateway.log
+grep -c 'kafka send message' /data/app/data-gateway.log
+grep -c 'kafka send success' /data/app/data-gateway.log
+#统计没有在系统登记的车辆
+grep -c 'is not platform vehicle' /data/app/logs/data-gateway-info.2024-12-09.log
+
+grep -c 'kafka send message' /data/app/logs/data-gateway-info.2024-12-09.log
+grep -c 'kafka send success' /data/app/logs/data-gateway-info.2024-12-09.log
+#统计flink读取到的kafka消息数量和过滤后的数量
+grep -c 'invoke map' /data/app/flink-realtime.log
+grep -c 'filtered rowData' /data/app/flink-realtime.log
+#统计flink写入成功次数
+grep -c '"Status": "Success"' /data/app/flink-realtime.log
+grep -c 'load Result' /data/app/flink-realtime.log
+grep -c 'kafka send success' /data/app/flink-realtime.log
+#查看端口占用
+lsof -i:8080
+ss -tunlp |grep 8080
+
+
+kafka操作:
+--自动创建主题改成false。如果是自动，可能默认的分区数或副本因子是不正确的
+--创建主题
+sudo docker exec -it kafka1 kafka-topics --create --topic console-test-topic --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 3
+sudo docker exec -it kafka2 kafka-topics --create --topic console-test-topic --bootstrap-server kafka3:9092
+--数据网关写入主题
+sudo docker exec -it kafka1 kafka-topics --create --topic vehicle_dispatcher --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 3
+--flink抛出推演报警熵值计算事件的主题
+sudo docker exec -it kafka1 kafka-topics --create --topic vehicleAlarmAlgorithmCalculateEvent --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 3
+-- 测试flink的主题
+sudo docker exec -it kafka1 kafka-topics --create --topic testVehicleDispatcher --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 3
+
+--删除主题
+sudo docker exec -it kafka1 kafka-topics --delete --topic console-test-topic --bootstrap-server kafka2:9092
+sudo docker exec -it kafka1 kafka-topics --delete --topic testVehicleDispatcher --bootstrap-server kafka2:9092
+sudo docker exec -it kafka1 kafka-topics --delete --topic vehicle_dispatcher --bootstrap-server kafka2:9092
+sudo docker exec -it kafka1 kafka-topics --delete --topic vehicleAlarmAlgorithmCalculateEvent --bootstrap-server kafka2:9092
+
+--查所有主题
+sudo docker exec -it kafka1 kafka-topics --list --bootstrap-server kafka1:9092
+--生产消息到对应主题
+sudo docker exec -it kafka1 kafka-console-producer --topic console-test-topic1 --bootstrap-server kafka1:9092
+--============================消费消息 start ============================
+--查看所有消费者组
+sudo docker exec -it kafka1 kafka-consumer-groups --bootstrap-server kafka2:9092 --list
+--查看某个消费者组的消费偏移量
+sudo docker exec -it kafka1 kafka-consumer-groups --describe --group dataGateway --bootstrap-server kafka2:9092
+sudo docker exec -it kafka1 kafka-consumer-groups --describe --group console1 --bootstrap-server kafka2:9092
+sudo docker exec -it kafka1 kafka-consumer-groups --describe --group flinkRealtime --bootstrap-server kafka2:9092
+sudo docker exec -it kafka1 kafka-consumer-groups --describe --group admin --bootstrap-server kafka2:9092
+--通过kafka-console-consume消费消息，并且不指定消费者组-consumer-property group.id。偏移量改变不会会持久化，相当于只查看不消费。
+sudo docker exec -it kafka1 kafka-console-consumer --topic console-test-topic1 --from-beginning --bootstrap-server kafka2:9092
+--通过kafka-console-consume消费消息，并且指定消费者组-consumer-property group.id。偏移量改变会持久化。
+sudo docker exec -it kafka1 kafka-console-consumer --topic vehicle_dispatcher --consumer-property group.id=console1 --from-beginning --bootstrap-server kafka2:9092
+--这里--from-beginning表示从offset=0开始消费，--max-messages 10表示每次最多消费10条
+sudo docker exec -it kafka1 kafka-console-consumer --topic vehicle_dispatcher --from-beginning --bootstrap-server kafka2:9092  --max-messages 10
+--这里--partition 0 --offset 100表示从分区0偏移量100开始消费
+sudo docker exec -it kafka1 kafka-console-consumer --topic vehicle_dispatcher --partition 0 --offset 100 --bootstrap-server kafka2:9092 --max-messages 10
+sudo docker exec -it kafka1 kafka-console-consumer --topic vehicle_dispatcher --partition 0 --offset 46000 --bootstrap-server kafka2:9092 --max-messages 500
+--修改某个消费者组的消费偏移量。如果kafka消息堆积过多，而且消息又没那么重要或者是测试环境，可以用此命令
+sudo docker exec -it kafka1 kafka-consumer-groups --bootstrap-server kafka2:9092 --topic vehicle_dispatcher --group console1 --reset-offsets --to-earliest --execute
+sudo docker exec -it kafka1 kafka-consumer-groups --bootstrap-server kafka2:9092 --topic vehicle_dispatcher --group console1 --reset-offsets --to-latest --execute
+sudo docker exec -it kafka1 kafka-consumer-groups --bootstrap-server kafka2:9092 --topic vehicle_dispatcher --group console1 --reset-offsets --to-offset 44 --execute
+--============================消费消息 end   ============================
+--检查集群状态
+--查看所有主题的分区情况、副本情况
+sudo docker exec -it kafka1 kafka-topics --describe -bootstrap-server kafka3:9092
+--查看某个主题的分区情况、副本情况
+sudo docker exec -it kafka1 kafka-topics --describe --topic console-test-topic --bootstrap-server kafka3:9092
+sudo docker exec -it kafka1 kafka-topics --describe --topic vehicle_dispatcher --bootstrap-server kafka3:9092
+sudo docker exec -it kafka1 kafka-topics --describe --topic vehicleAlarmAlgorithmCalculateEvent --bootstrap-server kafka3:9092
+
+#粗略统计实时上传信息中日期为某天的消息占总消息的比例。
+#注意关键字中的\和“都要转义，即分别变成\\和\"
+sudo docker exec -it kafka1 kafka-console-consumer --topic vehicle_dispatcher --partition 1 --offset 45000 --bootstrap-server kafka2:9092 --max-messages 2000 |grep -c '\\\"day\\\"'
+sudo docker exec -it kafka1 kafka-console-consumer --topic vehicle_dispatcher --partition 1 --offset 45000 --bootstrap-server kafka2:9092 --max-messages 2000 |grep -c '\\\"day\\\":12'

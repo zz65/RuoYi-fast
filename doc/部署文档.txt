@@ -1,0 +1,666 @@
+
+一、部署基础工作
+1.fdisk挂载数据盘
+--root用户登陆
+--查看数据盘分区情况和挂载情况
+lsblk
+df -Th
+--分区
+fdisk /dev/vdb p n 四个回车(从Select default p 到 Last sector) w
+--查看数据盘分区情况
+lsblk
+--格式化
+mkfs.xfs /dev/vdb1
+blkid
+vim /etc/fstab
+=============== start ===============
+UUID="d4127f47-7a96-4063-b3c7-3d336248dff2" /data xfs     defaults        0 0
+UUID="dbffabeb-ffed-4e6a-9342-a3a25d945147" /data xfs     defaults        0 0
+=============== end   ===============
+--挂载
+mkdir /data
+mount -a
+--查看数据盘挂载情况
+df -Th
+
+#关闭swap分区，详情要参照《运维问题处理》！！！！！
+#关闭ipv6，详情要参照《运维问题处理》！！！！！
+
+2.修改服务器密码。管理用户组、用户
+groupadd examine
+useradd -g examine -m examine 或 usermod -aG examine examine
+passwd examine
+-- 密码 Guo..1.7
+chown -R examine:examine /data
+chmod -R 750 /data
+chmod -R 750 /home/examine
+usermod -s /bin/bash examine
+
+-- 设置时区
+timedatectl status
+timedatectl set-timezone Asia/Shanghai
+-- 如果显示无权限，需要关闭systemd-timesyncd
+systemctl stop systemd-timesyncd
+-- 时间文件指向正确的时区文件
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+--查看时间,确认时区修改成功
+date
+
+-- 修改主机名
+nano /etc/hostname
+nano /etc/hosts
+netplan apply
+--查看主机名
+hostname
+
+--配置sudo用户
+vim /etc/sudoers
+--暂时使用root用户不需要密码
+=============== start ===============
+examine ALL=(ALL) NOPASSWD: ALL
+=============== end   ===============
+
+
+3.docker、docker-compose安装和配置
+(1)docker安装
+--更新apt-get包的索引
+apt-get update
+
+--安装apt依赖包。如果需要重启服务，请按tab键选择ok
+apt-get install apt-transport-https \
+   ca-certificates \
+   curl \
+   gnupg-agent \
+   software-properties-common
+
+--添加阿里云Docker镜像源GPG秘钥
+curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+--添加阿里云镜像源
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+--更新apt
+apt update
+
+--安装新版本的Docker、docker-compose
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose
+--查看是否安装成功
+docker --version
+docker-compose --version
+
+
+(2)镜像加速,镜像和容器数据存储目录设置,存储驱动
+mkdir -p /etc/docker
+vim /etc/docker/daemon.json
+{
+  "registry-mirrors": ["https://docker.rainbond.cc"],
+  "data-root": "/data/docker",
+  "storage-driver": "overlay2"
+}
+
+-- 镜像加速地址如下
+详见网站：https://www.coderjia.cn/archives/dba3f94c-a021-468a-8ac6-e840f85867ea
+hub.geekery.cn	正常
+hub.littlediary.cn	正常
+docker.rainbond.cc	正常
+docker.unsee.tech	正常
+docker.m.daocloud.io	正常
+hub.crdz.gq	正常
+docker.nastool.de	正常
+hub.firefly.store	正常
+registry.dockermirror.com	正常
+docker.1panelproxy.com	正常
+hub.rat.dev	正常
+docker.udayun.com	正常
+docker.kejilion.pro	正常
+dhub.kubesre.xyz	正常
+docker.1panel.live	正常
+dockerpull.org	正常
+docker.hlmirror.com	新增
+docker.imgdb.de	新增
+
+--把源目录下的存储移到/data磁盘
+mkdir -p /data/docker
+cp -rp /var/lib/docker/* /data/docker
+
+systemctl daemon-reload
+systemctl restart docker
+systemctl status docker
+
+=====================下面开始使用非root用户进行操作: 如登录examine用户 ===================================
+(3)镜像仓库设置
+
+--下面以doris镜像为例
+制作镜像：制作doris镜像参考官方文档 https://doris.apache.org/zh-CN/docs/install/cluster-deployment/run-docker-cluster#%E6%9E%84%E5%BB%BA-fe-%E9%95%9C%E5%83%8F
+
+1)登录镜像操作：使用阿里云私有仓库，需要输入密码
+sudo docker login --username=zhuz2023 registry.cn-hangzhou.aliyuncs.com
+--密码提示
+Qxxxx3
+
+2)重命名镜像
+sudo docker tag doris-fe:2.1.6 registry.cn-hangzhou.aliyuncs.com/examine_1/doris-fe:2.1.6
+sudo docker tag doris-be:2.1.6 registry.cn-hangzhou.aliyuncs.com/examine_1/doris-be:2.1.6
+
+--doris2.1.7
+sudo docker tag apache/doris:doris-fe-2.1.7 registry.cn-hangzhou.aliyuncs.com/examine_1/apache-doris:doris-fe-2.1.7
+sudo docker tag apache/doris:doris-be-2.1.7 registry.cn-hangzhou.aliyuncs.com/examine_1/apache-doris:doris-be-2.1.7
+
+--kafka
+sudo docker tag confluentinc/cp-kafka:7.7.1 registry.cn-hangzhou.aliyuncs.com/examine_1/confluentinc_cp-kafka:7.7.1
+
+--redis
+sudo docker tag redis:6.0 registry.cn-hangzhou.aliyuncs.com/examine_1/redis:6.0
+
+
+3)上传镜像
+sudo docker push registry.cn-hangzhou.aliyuncs.com/examine_1/doris-fe:2.1.6
+sudo docker push registry.cn-hangzhou.aliyuncs.com/examine_1/doris-be:2.1.6
+
+--doris2.1.7
+sudo docker push registry.cn-hangzhou.aliyuncs.com/examine_1/apache-doris:doris-fe-2.1.7
+sudo docker push registry.cn-hangzhou.aliyuncs.com/examine_1/apache-doris:doris-be-2.1.7
+
+--kafka
+sudo docker push registry.cn-hangzhou.aliyuncs.com/examine_1/confluentinc_cp-kafka:7.7.1
+
+--redis
+sudo docker push registry.cn-hangzhou.aliyuncs.com/examine_1/redis:6.0
+
+4)拉取镜像（其他服务器使用）
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/examine_1/doris-fe:2.1.6
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/examine_1/doris-be:2.1.6
+
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/examine_1/apache/doris:doris-fe-2.1.7
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/examine_1/apache/doris:doris-be-2.1.7
+
+--kafka
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/examine_1/confluentinc_cp-kafka:7.7.1
+
+--redis
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/examine_1/redis:6.0
+
+4、网络安全规则
+注意需要备案的端口，尽量避开：25/80/443/8080/53
+不通过命令，直接通过云厂商页面配置修改
+端口：ssh、doris-fe的外网web页面端口和外网数据库连接端口、mysql的通信端口、redis的外网连接端口和外网gossip端口、
+kafka的外网发布端口、nginx的外网端口号、admin外网端口号、dataGateway外网端口号，snail-job-server的外网端口
+
+5.操作系统调优
+每个 sed -i 命令会删除文件中已存在的设置行，然后 echo 命令会在文件末尾添加新的设置。
+这种方法的优点是可以通过脚本自动化配置，但缺点是如果原始文件格式不完全符合预期，可能会导致意外的更改。
+1)设置系统最大打开文件句柄数
+cat /etc/security/limits.conf
+sudo sed -i '/\* soft nofile/d' /etc/security/limits.conf
+sudo sed -i '/\* hard nofile/d' /etc/security/limits.conf
+echo '* soft nofile 65536' | sudo tee -a /etc/security/limits.conf
+echo '* hard nofile 65536' | sudo tee -a /etc/security/limits.conf
+cat /etc/security/limits.conf
+
+cat /etc/pam.d/common-session
+echo 'session required pam_limits.so' | sudo tee -a /etc/pam.d/common-session
+cat /etc/pam.d/common-session
+
+cat /etc/pam.d/common-session-noninteractive
+echo 'session required pam_limits.so' | sudo tee -a /etc/pam.d/common-session-noninteractive
+cat /etc/pam.d/common-session-noninteractive
+
+-- 重新登陆或者重启才有效
+2)优化线程数:
+sudo sed -i '/\* soft nproc/d' /etc/security/limits.conf
+sudo sed -i '/\* hard nproc/d' /etc/security/limits.conf
+echo '* soft nproc 65535' | sudo tee -a /etc/security/limits.conf
+echo '* hard nproc 65535' | sudo tee -a /etc/security/limits.conf
+cat /etc/security/limits.conf
+
+3）内核参数调优：
+参考文章：https://blog.csdn.net/hguisu/article/details/39249775
+sudo vim /etc/sysctl.conf
+# 使内容生效
+sudo sysctl -p
+
+内容如下：
+# 用来指定外部连接的端口范围，默认是32 768到61 000，这里设置为1024到65 536。
+net.ipv4.ip_local_port_range = 1024 65536
+# 指定接收套接字缓冲区大小的最大值，单位是字节。
+net.core.rmem_max=16777216
+# 指定发送套接字缓冲区大小的最大值，单位是字节。
+net.core.wmem_max=16777216
+net.ipv4.tcp_rmem=4096 87380 16777216
+net.ipv4.tcp_wmem=4096 65536 16777216
+net.ipv4.tcp_fin_timeout = 30
+net.core.netdev_max_backlog = 30000
+net.ipv4.tcp_no_metrics_save=1
+# 用于设置系统中所有监听套接字的最大 backlog 队列长度，默认值通常是128。这个参数对于网络服务器的性能和稳定性非常重要，特别是在高并发场景下。
+net.core.somaxconn = 262144
+net.ipv4.tcp_syncookies = 1
+net.ipv4.tcp_max_orphans = 262144
+net.ipv4.tcp_max_syn_backlog = 262144
+net.ipv4.tcp_synack_retries = 2
+# 此参数表示在内核放弃建立连接之前发送SYN包的数量。
+net.ipv4.tcp_syn_retries = 2
+
+
+二、部署中间件
+1. doris2.1.6
+配置docker-compose.yaml：应用、数据卷、环境变量、网络
+配置文件使用Docker Compose部署一个包含1个fe,3个be节点的集群，并配置为使用自定义IPv4网络
+
+--配置系统参数
+方法见《运维问题处理》关闭swap的部分
+
+--创建目录
+sudo mkdir -p /data/fe-01/conf /data/be-01/conf /data/be-02/conf /data/be-03/conf
+--docker-compose启动
+sudo docker-compose -f docker-compose.yaml up -d
+--查看状态
+sudo docker-compose -f docker-compose.yaml ps
+
+--查看日志
+ sudo docker-compose -f ~/docker-compose-doris.yaml logs --tail 222 -f doris-fe-01
+ sudo docker-compose -f ~/docker-compose-doris.yaml logs --tail 222 -f doris-be-01
+ sudo docker-compose -f ~/docker-compose-doris.yaml logs --tail 222 -f doris-be-02
+ sudo docker-compose -f ~/docker-compose-doris.yaml logs --tail 222 -f doris-be-03
+
+--登录FE节点的web ui（原生端口：8030）
+http://116.147.38.18:8030
+
+================ 2.1.7版本不需要执行这些语句，会自动添加 start ================
+--集群元信息管理：添加be节点到fe节点的元信息中
+--推荐使用docker桥接网络的ip
+--优点：1）性能好 2）安全
+--缺点：1）flink-doris-connector在docker桥接网络模式下，无法插入数据到doris
+ALTER SYSTEM ADD FOLLOWER "172.20.80.2:9010";
+
+ALTER SYSTEM ADD BACKEND "172.20.80.5:9050";
+ALTER SYSTEM ADD BACKEND "172.20.80.6:9050";
+ALTER SYSTEM ADD BACKEND "172.20.80.7:9050";
+--使用宿主机ip或外网不推荐，
+--优点：1）flink-doris-connector在此模式下，可以插入数据到doris
+--缺点：1）性能不好 2）不安全
+ALTER SYSTEM ADD BACKEND "116.147.38.18:9051";
+ALTER SYSTEM ADD BACKEND "116.147.38.18:9052";
+ALTER SYSTEM ADD BACKEND "116.147.38.18:9053";
+================ 2.1.7版本不需要执行这些语句，会自动添加 end ================
+--查看集群元信息
+show backends
+show frontends
+
+--安全删除
+ALTER SYSTEM DECOMMISSION BACKEND "116.147.38.18:9051","116.147.38.18:9052","116.147.38.18:9053"
+-- ALTER SYSTEM DECOMMISSION BACKEND "172.20.80.5:9050","172.20.80.6:9050","172.20.80.7:9050";
+-- ALTER SYSTEM DROP BACKEND "172.20.80.5:9050","172.20.80.6:9050","172.20.80.7:9050";
+-- ALTER SYSTEM DROPP BACKEND "172.20.80.5:9050","172.20.80.6:9050","172.20.80.7:9050";
+--修改密码
+ALTER USER 'root' IDENTIFIED BY 'Guozubisheng1@7';
+--ALTER USER 'root' IDENTIFIED BY '';
+
+--测试doris（原生端口：9030）
+sudo docker exec -it doris-fe-01 /bin/bash
+--容器时间和宿主机同步
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+--查看时间
+date
+--连接doris
+mysql -h 127.0.0.1 -P 9030 -u root -p
+或
+sudo docker exec -it doris-fe-01 mysql -h 127.0.0.1 -P 9030 -u root -p
+
+--查看编码
+SHOW VARIABLES LIKE 'character_set%';
+SHOW VARIABLES LIKE 'collation%';
+-- 查看时区
+show variables like '%time_zone%';
+select now();
+
+--创建测试数据库
+CREATE DATABASE testdb;
+use testdb;
+--建表
+CREATE TABLE users (
+id INT NOT NULL,
+name VARCHAR(50),
+email VARCHAR(100)
+)
+UNIQUE KEY(id)
+DISTRIBUTED BY HASH(id) BUCKETS 8 PROPERTIES ("replication_num" = "1");
+--插入语句
+INSERT INTO users (id, name, email) VALUES (1, 'Alice', 'alice@example.com');
+INSERT INTO users (id, name, email) VALUES (2, 'Bob', 'bob@example.com');
+--查询
+SELECT * FROM users;
+-- 查看整个集群的分片分布情况
+SHOW PARTITIONS FROM testdb.users;
+
+--创建车联网数据库1
+CREATE DATABASE iov;
+use iov;
+
+--创建车联网数据库2
+CREATE DATABASE vehicle;
+use vehicle;
+
+--生产 admin 用户 密码不在这里记录
+
+--本地虚拟机 local 用户
+CREATE USER 'local'@'%' IDENTIFIED BY '1234';
+alter user 'local'@'%' IDENTIFIED BY '1234';
+
+--授权iov库给用户
+GRANT ALL ON iov.* TO 'local'@'%';
+--授权vehicle库给用户
+GRANT ALL ON vehicle.* TO 'local'@'%';
+-- 查看用户连接数
+SHOW PROPERTY FOR 'local' LIKE '%max_user_connections%';
+-- 设置连接数,默认100，doris群给了10000。测试环境先搞1000试试，生产搞10000试试
+SET PROPERTY FOR 'local' 'max_user_connections' = '1000';
+
+
+2.mysql
+--创建目录
+sudo mkdir -p /data/mysql/conf
+
+--启动容器
+sudo docker run -d -p 33306:3306 --name mysql8 \
+-v /data/mysql/log:/var/log/mysql \
+-v /data/mysql/data:/var/lib/mysql \
+-v /data/mysql/conf:/etc/mysql/conf.d \
+-e MYSQL_ROOT_PASSWORD=1234 \
+-e TZ=Asia/Shanghai \
+container-registry.oracle.com/mysql/community-server:8.0
+
+#获取mysql交互式终端，进入mysql,输入用户名密码
+sudo docker exec -it mysql8 /bin/bash
+--容器时间和宿主机同步
+ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+--查看时间
+date
+--连接mysql
+mysql -uroot -p
+或
+sudo docker exec -it mysql8 mysql -uroot -p
+
+--查看编码
+SHOW VARIABLES LIKE 'character_set%';
+SHOW VARIABLES LIKE 'collation%';
+-- 查看时区
+show variables like '%time_zone%';
+select now();
+
+--创建数据库,创建用户和密码,给用户授权
+show databases;
+create database iov;
+use iov;
+
+--ALTER USER 'root'@'localhost' IDENTIFIED BY '';
+
+CREATE USER 'iov'@'%' IDENTIFIED BY 'Guozu1@7';
+GRANT ALL ON iov.* TO 'iov'@'%';
+--
+sudo docker exec -it mysql8 mysql -uiov -p
+
+3.redis cluster
+配置文件使用Docker Compose部署一个包含3个节点的redis cluster，并配置为使用自定义IPv4网络
+--docker-compose启动
+sudo docker-compose -f docker-compose-redis.yaml up -d
+--查看状态
+sudo docker-compose -f docker-compose-redis.yaml ps
+--初始化集群.进入任意容器
+sudo docker exec -it redis1 /bin/bash
+--查看ip
+cat /etc/hosts
+--创建集群
+--如果已经插入数据了，先清空节点数据
+-- sudo docker exec -it redis1 redis-cli -a Examine@1016 flushall
+--docker内网ip创建集群
+sudo docker exec -it redis1 redis-cli -a Examine@1016 --cluster create 172.28.0.2:6379 172.28.0.3:6379 172.28.0.4:6379 --cluster-replicas 0
+--宿主机内网ip创建集群
+sudo docker exec -it redis1 redis-cli -a Examine@1016 --cluster create 192.168.0.101:7001 192.168.0.101:7002 192.168.0.101:7003 --cluster-replicas 0
+--宿主机外网ip创建集群
+sudo docker exec -it redis1 redis-cli -a Examine@1016 --cluster create 116.147.38.18:7001 116.147.38.18:7002 116.147.38.18:7003 --cluster-replicas 0
+--测试
+--查看集群状态
+sudo docker exec -it redis1 redis-cli -a Examine@1016 -c cluster nodes
+sudo docker exec -it redis1 redis-cli -a Examine@1016 -c cluster info
+--查看各节点的slot的范围
+sudo docker exec -it redis1 redis-cli -a Examine@1016 -c  CLUSTER SLOTS
+--看key分布在哪个slot
+sudo docker exec -it redis1 redis-cli -a Examine@1016 -c CLUSTER KEYSLOT k1
+--写入
+sudo docker exec -it redis1 redis-cli -a Examine@1016 -c
+set k1 v1
+set k2 v2
+set k3 v3
+--读取
+get k1
+get k2
+get k3
+--检查时区
+time
+--ctrl+c退出redis控制台，通过date命令和time返回的时间戳秒数查询时区日期
+date -d @"1729064148"
+
+
+
+4.kafka
+配置文件使用Docker Compose部署一个模式为KRaft、包含3个节点的kafka集群，并配置为使用自定义IPv4网络，比如kafka内网是127.1.1.1，外网是10.1.1.1
+注意：这里特别注意listener和advertise.listerner的配置，listener是broker和controller实际监听的端口号，advertise.listerner是broker发布的监听的端口号，
+advertise.listerner不需要写controller端口，因为他不需要发布，客户端发送请求只发送给broker。
+
+-- 提前创建目录
+cd /data
+sudo mkdir kafka-node-1 kafka-node-2 kafka-node-3
+
+-- 由于启动用户不是登录用户，所以要修改目录的权限
+cd /data
+sudo chmod -R 777 kafka-node-*
+
+--docker-compose启动
+--注意提前生成KAFKA_CLUSTER_ID
+sudo docker-compose -f docker-compose-kafka.yaml up -d --remove-orphans
+sudo docker-compose -f docker-compose-kafka.yaml ps
+--kafka会用ubuntu用户去创建目录
+sudo chown -R ubuntu:ubuntu /data/kafka*
+sudo docker-compose -f docker-compose-kafka.yaml down
+sudo docker-compose -f docker-compose-kafka.yaml up -d --remove-orphans
+
+--看ip
+sudo apt install net-tools
+ifconfig
+
+--查看日志
+sudo docker logs --tail 50 -f kafka1
+
+--测试kafka
+
+--查看kafka版本
+sudo docker exec -it kafka1 kafka-topics --version
+sudo docker exec -it kafka1 kafka-server-start --version
+我们使用的Confluent Platform的kafka版本号是7.7.1-ccs，对应的Apache Kafka版本是3.5.1
+
+--自动创建主题改成false。如果是自动，可能默认的分区数或副本因子是不正确的
+--创建主题
+sudo docker exec -it kafka1 kafka-topics --create --topic console-test-topic --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 3
+sudo docker exec -it kafka2 kafka-topics --create --topic console-test-topic --bootstrap-server kafka3:9092
+--数据网关写入主题
+sudo docker exec -it kafka1 kafka-topics --create --topic vehicle_dispatcher --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 3
+--数据网关写入主题-测试主题
+sudo docker exec -it kafka1 kafka-topics --create --topic testVehicleDispatcher --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 3
+--flink抛出推演报警熵值计算事件的主题
+sudo docker exec -it kafka1 kafka-topics --create --topic vehicleAlarmAlgorithmCalculateEvent --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 3
+--flink抛出推演报警熵值计算事件的主题-测试主题
+sudo docker exec -it kafka1 kafka-topics --create --topic testVehicleAlarmAlgorithmCalculateEvent --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 3
+
+--删除主题
+sudo docker exec -it kafka1 kafka-topics --delete --topic console-test-topic --bootstrap-server kafka2:9092
+sudo docker exec -it kafka1 kafka-topics --delete --topic testVehicleDispatcher --bootstrap-server kafka2:9092
+sudo docker exec -it kafka1 kafka-topics --delete --topic testVehicleAlarmAlgorithmCalculateEvent --bootstrap-server kafka2:9092
+sudo docker exec -it kafka1 kafka-topics --delete --topic vehicle_dispatcher --bootstrap-server kafka2:9092
+sudo docker exec -it kafka1 kafka-topics --delete --topic vehicleAlarmAlgorithmCalculateEvent --bootstrap-server kafka2:9092
+
+--查所有主题
+sudo docker exec -it kafka1 kafka-topics --list --bootstrap-server kafka1:9092
+--生产消息到对应主题
+sudo docker exec -it kafka1 kafka-console-producer --topic console-test-topic1 --bootstrap-server kafka1:9092
+
+--查所有主题
+sudo docker exec -it kafka1 kafka-topics --list --bootstrap-server kafka1:9092
+--生产消息到对应主题
+sudo docker exec -it kafka1 kafka-console-producer --topic console-test-topic1 --bootstrap-server kafka1:9092
+--============================消费消息 start ============================
+--查看所有消费者组
+sudo docker exec -it kafka1 kafka-consumer-groups --bootstrap-server kafka2:9092 --list
+--查看某个消费者组的消费偏移量
+sudo docker exec -it kafka1 kafka-consumer-groups --describe --group dataGateway --bootstrap-server kafka2:9092
+sudo docker exec -it kafka1 kafka-consumer-groups --describe --group console1 --bootstrap-server kafka2:9092
+sudo docker exec -it kafka1 kafka-consumer-groups --describe --group flinkRealtime --bootstrap-server kafka2:9092
+sudo docker exec -it kafka1 kafka-consumer-groups --describe --group admin --bootstrap-server kafka2:9092
+--通过kafka-console-consume消费消息，并且不指定消费者组-consumer-property group.id。偏移量改变不会会持久化，相当于只查看不消费。
+sudo docker exec -it kafka1 kafka-console-consumer --topic console-test-topic1 --from-beginning --bootstrap-server kafka2:9092
+--通过kafka-console-consume消费消息，并且指定消费者组-consumer-property group.id。偏移量改变会持久化。
+sudo docker exec -it kafka1 kafka-console-consumer --topic vehicle_dispatcher --consumer-property group.id=console1 --from-beginning --bootstrap-server kafka2:9092
+--这里--from-beginning表示从offset=0开始消费，--max-messages 10表示每次最多消费10条
+sudo docker exec -it kafka1 kafka-console-consumer --topic vehicle_dispatcher --from-beginning --bootstrap-server kafka2:9092  --max-messages 10
+--这里--partition 0 --offset 100表示从分区0偏移量100开始消费
+sudo docker exec -it kafka1 kafka-console-consumer --topic vehicle_dispatcher --partition 0 --offset 100 --bootstrap-server kafka2:9092 --max-messages 10
+sudo docker exec -it kafka1 kafka-console-consumer --topic vehicle_dispatcher --partition 0 --offset 46000 --bootstrap-server kafka2:9092 --max-messages 500
+--修改某个消费者组的消费偏移量。如果kafka消息堆积过多，而且消息又没那么重要或者是测试环境，可以用此命令
+sudo docker exec -it kafka1 kafka-consumer-groups --bootstrap-server kafka2:9092 --topic vehicle_dispatcher --group console1 --reset-offsets --to-earliest --execute
+sudo docker exec -it kafka1 kafka-consumer-groups --bootstrap-server kafka2:9092 --topic vehicle_dispatcher --group console1 --reset-offsets --to-latest --execute
+sudo docker exec -it kafka1 kafka-consumer-groups --bootstrap-server kafka2:9092 --topic vehicle_dispatcher --group console1 --reset-offsets --to-offset 44 --execute
+--============================消费消息 end   ============================
+--检查集群状态
+--查看所有主题的分区情况、副本情况
+sudo docker exec -it kafka1 kafka-topics --describe -bootstrap-server kafka3:9092
+--查看某个主题的分区情况、副本情况
+sudo docker exec -it kafka1 kafka-topics --describe --topic console-test-topic --bootstrap-server kafka3:9092
+sudo docker exec -it kafka1 kafka-topics --describe --topic vehicle_dispatcher --bootstrap-server kafka3:9092
+
+--错误
+Exception in thread "main" java.lang.IllegalArgumentException: requirement failed:
+The advertised.listeners config must not contain KRaft controller listeners from controller.listener.names when process.roles contains the broker role
+because Kafka clients that send requests via advertised listeners do not send requests to KRaft controllers -- they only send requests to KRaft brokers.
+
+Exception in thread "main" java.lang.IllegalArgumentException: requirement failed:
+controller.listener.names must contain at least one value appearing in the 'listeners' configuration when running the KRaft controller role
+
+
+
+5.nginx
+docker pull nginx:1.21.5
+#创建目录
+mkdir /data/nginx
+cd /data/nginx
+mkdir conf log html
+#准备配置文件nginx.conf,conf.d。放到conf目录
+
+#docker启动nginx1.21.5容器镜像
+sudo docker run \
+-p 8888:80 \
+--name nginx \
+-v /data/nginx/conf/nginx.conf:/etc/nginx/nginx.conf \
+-v /data/nginx/conf/conf.d:/etc/nginx/conf.d \
+-v /data/nginx/log:/var/log/nginx \
+-v /data/nginx/html:/etc/nginx/html \
+-d nginx:1.21.5
+
+-- 查看是否启动成功
+sudo docker ps
+-- 如果启动失败，查看错误日志
+sudo docker ps -a
+sudo docker logs <容器id>
+
+--查看nginx版本号
+sudo docker exec -it nginx nginx -V
+--检查语法
+sudo docker exec -it nginx nginx -t
+--保存修改
+sudo docker exec -it nginx nginx -s reload
+
+
+三、部署应用
+1、在数据盘创建目录
+cd /data
+mkdir app soft
+
+2.部署springboot
+a.
+1)配置环境变量jdk21
+cd soft
+--下载
+wget https://download.java.net/openjdk/jdk21/ri/openjdk-21+35_linux-x64_bin.tar.gz
+--解压
+tar -zxvf openjdk-21+35_linux-x64_bin.tar.gz -C .
+--配置环境变量
+vim ~/.bashrc
+非编辑模式下，按G或gg跳到结尾或开头。或者:$,:1
+============= 文件内容追加 start =============
+export JAVA_HOME=/home/examine/soft/jdk-21
+export JRE_HOME=${JAVA_HOME}/jre
+export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib
+export PATH=${JAVA_HOME}/bin:$PATH
+============= 文件内容追加 end =============
+source  ~/.bashrc
+--验证是否安装成功
+java -version
+
+2)配置环境变量jdk8
+cd soft
+--官网下载jdk-8u202-linux-x64.tar.gz，上传
+--其他步骤和jdk21安装差不多，改改路径和文件名就行了
+tar -zxvf jdk-8u202-linux-x64.tar.gz -C .
+mv jdk1.8.0_202 jdk8
+--配置环境变量
+vim ~/.bashrc
+非编辑模式下，按G或gg跳到结尾或开头。或者:$,:1
+============= 文件内容追加 start =============
+export JAVA_HOME=/home/examine/soft/jdk8
+export JRE_HOME=${JAVA_HOME}/jre
+export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib
+export PATH=${JAVA_HOME}/bin:$PATH
+============= 文件内容追加 end =============
+source  ~/.bashrc
+--验证是否安装成功
+java -version
+
+
+b.运行jar包
+--jdk21
+#预警平台后台管理
+#ecs03
+cd /data/app
+nohup java -Dspring.profiles.active=dev -Dport=8800 -Djava.awt.headless=true -jar -DenableJob=true \
+-Xms1024m -Xmx3072m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/data/app/ruoyi.8800.hprof \
+/data/app/ruoyi.jar --server.port=8800 > /dev/null 2>&1 &
+
+c.停止服务
+
+四、简单的命令监控
+1，top命令
+参考文章：https://blog.csdn.net/zhezhebie/article/details/142336260
+作用：查看资源消耗：负载，cpu,mem。
+字段说明：
+load average:是指过去1分钟、5分钟、15分钟的平均负载。
+us：用户空间占用CPU的百分比（user space）。
+sy：内核空间占用CPU的百分比（system）。
+id：空闲CPU百分比（idle）。
+wa：等待输入输出的CPU时间百分比（iowait）
+
+按键（区分大小写）：
+按h显示帮助展示
+按e键可以更改内存和交换空间的显示单位
+按c键查看完整命令行。可以看进程具体是哪个程序
+按M按照内存排序，按P按照cpu排序
+按数字1键查看每个逻辑核心cpu利用率
+
+2.tail和grep命令
+主要用于查看日志
+-- 查看滚动日志
+tail -n222 -f admin.log
+-- 关键字搜索日志，并支持翻页，向后翻页按空格/space,向前翻页按b。退出按q
+
+3查看端口占用
+lsof
+netstat -ano
+ss -tunlp
+
