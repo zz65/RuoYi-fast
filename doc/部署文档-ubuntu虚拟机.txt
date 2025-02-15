@@ -25,10 +25,6 @@ vi /usr/lib/sysctl.d//00-system.conf
 添加内容:  net.ipv4.ip_forward = 1 ,然后 esc :wq 保存
 systemctl restart network
 
-禁用ipv6
-sudo apt-get update
-sudo apt-get install openvswitch-switch
-
 三、应用部署
 docker部署应用
 注意：桥接网络ip地址不要和其他应用冲突
