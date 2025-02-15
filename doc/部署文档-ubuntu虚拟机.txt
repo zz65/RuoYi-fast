@@ -6,9 +6,7 @@
 2.新建虚拟机,配置：桥接网络，磁盘50g, 内存5g,核心2，每个核心2个处理器，总处理器4
 3.安装操作系统：记得勾选安装open SSH server
 4.服务器启动ssh服务,修改配置为允许密码登录，并重启ssh服务
-sudo systemctl start ssh
 sudo systemctl status ssh
-
 sudo nano /etc/ssh/sshd_config
     # 允许密码验证
     PasswordAuthentication yes
@@ -16,14 +14,33 @@ sudo nano /etc/ssh/sshd_config
     PermitRootLogin yes
 
 sudo systemctl restart ssh
+sudo systemctl status ssh
 
-5.用ssh客户端连接服务器
+5.用ssh客户端连接服务器,验证
+
 6.操作系统配置：挂载磁盘，分区。磁盘、文件系统、分区、逻辑卷扩容。
-（1）禁用swap、ipv6
-（2）开启ipv4,否则挂起虚拟机再恢复，网络将不可用
-vi /usr/lib/sysctl.d//00-system.conf
-添加内容:  net.ipv4.ip_forward = 1 ,然后 esc :wq 保存
-systemctl restart network
+（1）禁用swap
+（2）禁用ipv6
+（3）固定ipv4地址, 否则重启虚拟机或挂起后恢复，网络将不可用
+    1）修改netplan配置文件，一般在/etc/netplan目录下
+    ls /etc/netplan
+    2）以 50-cloud-init.yaml 为例,修改
+    vim 50-cloud-init.yaml
+    #添加内容，假如以太网网卡名是ens33，固定ip为192.168.0.100/24
+    network:
+        ethernets:
+            ens33:
+                dhcp4: false
+                addresses: [192.168.0.100/24]
+        version: 2
+    修改之后保存
+
+    3)使得配置生效，虽然有个报错，但是不影响
+    sudo netplan apply
+
+    4）验证ip地址生效
+    # 替换为你的实际网卡名称
+    ip addr show ens33
 
 三、应用部署
 docker部署应用

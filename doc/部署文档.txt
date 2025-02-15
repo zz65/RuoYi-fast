@@ -365,8 +365,11 @@ sudo docker run -d -p 33306:3306 --name mysql8 \
 -v /data/mysql/conf:/etc/mysql/conf.d \
 -e MYSQL_ROOT_PASSWORD=1234 \
 -e TZ=Asia/Shanghai \
+--restart always \
 registry.cn-hangzhou.aliyuncs.com/examine_1/mysql_community-server:8.0
 #container-registry.oracle.com/mysql/community-server:8.0
+-- 对于已存在容器，系统重启容器自动重启
+docker update --restart always mysql8
 
 #获取mysql交互式终端，进入mysql,输入用户名密码
 sudo docker exec -it mysql8 /bin/bash
