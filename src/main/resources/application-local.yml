@@ -86,3 +86,9 @@ mqtt:
     connection-timeout: 10
     action-timeout: 10
     clean-session: true
+    thread-pool:
+        core-pool-size: 1
+        max-pool-size: 2
+        queue-capacity: 20000
+        keep-alive-seconds: 60
+        thread-name-prefix: mqtt-thread-pool-

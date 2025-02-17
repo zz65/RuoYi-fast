@@ -1,7 +1,13 @@
 package com.ruoyi.project.mqtt.netty.utils;
 
+import com.ruoyi.common.utils.spring.SpringUtils;
+import com.ruoyi.project.mqtt.netty.properties.MqttThreadPoolConfig;
+import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -17,38 +23,44 @@ import java.util.concurrent.TimeoutException;
  * @date 2023/11/30 14:33
  * @description: 异步任务
  */
-// @Component
+// @RequiredArgsConstructor
 public abstract class AsyncTask<T> implements RunnableFuture<T>, Callable<T> {
-    // @Value("${thread.pool.core-pool-size: 5}")
-    // private int corePoolSize;
-    //
-    // @Value("${thread.pool.maximum-pool-size: 15}")
-    // private int maximumPoolSize;
-    //
-    // @Value("${thread.pool.keep-alive-time: 120}")
-    // private long keepAliveTime;
-    //
-    // @Value("${thread.pool.queue.capacity: 50000}")
-    // private int capacity;
+    private MqttThreadPoolConfig mqttThreadPoolConfig;
 
-    /**
-     * 20231130 zhuzhen改，因为资源有限，所以把线程数量，队列长度修改了。
-     */
-    // private static volatile Executor sDefaultExecutor = Executors.newCachedThreadPool();
-    private volatile Executor sDefaultExecutor = new ThreadPoolExecutor(
-            /* corePoolSize, maximumPoolSize, keepAliveTime,*/
-            4, 4, 120,
-            TimeUnit.SECONDS,
-            // new LinkedBlockingQueue<>(capacity),
-            new LinkedBlockingQueue<>(20000),
-            //线程名前缀
-            new CustomizableThreadFactory("AsyncTask-"),
-            new ThreadPoolExecutor.CallerRunsPolicy()
-    );
+    // private volatile Executor sDefaultExecutor = new ThreadPoolExecutor(
+    //         /* corePoolSize, maximumPoolSize, keepAliveTime,*/
+    //         4, 4, 120,
+    //         TimeUnit.SECONDS,
+    //         // new LinkedBlockingQueue<>(capacity),
+    //         new LinkedBlockingQueue<>(20000),
+    //         //线程名前缀
+    //         new CustomizableThreadFactory("AsyncTask-"),
+    //         new ThreadPoolExecutor.CallerRunsPolicy()
+    // );
+    private volatile Executor sDefaultExecutor = null;
 
     private FutureTask<T> futureTask;
 
     public AsyncTask() {
+        if (mqttThreadPoolConfig == null) {
+            mqttThreadPoolConfig = SpringUtils.getBean(MqttThreadPoolConfig.class);
+        }
+        int corePoolSize = mqttThreadPoolConfig.getCorePoolSize();
+        int maxPoolSize = mqttThreadPoolConfig.getMaxPoolSize();
+        int queueCapacity = mqttThreadPoolConfig.getQueueCapacity();
+        int keepAliveSeconds = mqttThreadPoolConfig.getKeepAliveSeconds();
+        String threadNamePrefix = mqttThreadPoolConfig.getThreadNamePrefix();
+
+        if (sDefaultExecutor == null) {
+            sDefaultExecutor = new ThreadPoolExecutor(
+                    corePoolSize, maxPoolSize, keepAliveSeconds,
+                    TimeUnit.SECONDS,
+                    new LinkedBlockingQueue<>(queueCapacity),
+                    //线程名前缀
+                    new CustomizableThreadFactory(threadNamePrefix),
+                    new ThreadPoolExecutor.DiscardOldestPolicy()); // 丢弃最老的任务
+        }
+
         this.futureTask = new FutureTask<T>(this) {
             @Override
             protected void done() {
