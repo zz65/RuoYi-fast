@@ -673,4 +673,49 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils
         }
         return sb.toString();
     }
+
+    /**
+     * 拼接字符串，避免频繁创建String对象
+     * @param  args
+     * @return      boolean
+     */
+    public static String append(Object... args) {
+        if (args == null) {
+            return EMPTY;
+        }
+
+        if (args.length == 1) {
+            return String.valueOf(args[0]);
+        }
+
+        StringBuffer stringBuffer = new StringBuffer();
+        for (Object o : args) {
+            stringBuffer.append(o);
+        }
+
+        String s = stringBuffer.toString();
+        return s;
+    }
+
+    /**
+     * ascii/unicode值转字符串（尤其中文的处理）
+     * @param asciicode
+     * @return
+     */
+    public static String asciiToNative(String asciicode) {
+        String[] asciis = asciicode.split("\\\\u");
+        String nativeValue = asciis[0];
+        try {
+            for (int i = 1; i < asciis.length; i++) {
+                String code = asciis[i];
+                nativeValue += (char) Integer.parseInt(code.substring(0, 4), 16);
+                if (code.length() > 4) {
+                    nativeValue += code.substring(4, code.length());
+                }
+            }
+        } catch (NumberFormatException e) {
+            return asciicode;
+        }
+        return nativeValue;
+    }
 }

@@ -67,3 +67,22 @@ spring:
                 wall:
                     config:
                         multi-statement-allow: true
+
+#mqtt配置
+mqtt:
+    protocol: tcp
+    #自己服务器 106.75.27.91
+    #用于测试的服务器 broker-cn.emqx.io
+    host: broker-cn.emqx.io
+    port: 1883
+    #暂时用户名和密码是空的
+    username:
+    password:
+    client-id: examine-mqtt-netty
+    #  inbound-topic: emqx/+/test,emqx/+/test_reply,emqx/young/+
+    inbound-topic: emqx/+/test
+    topic: inhand/examine/# #为了和其他使用mqtt服务器的人隔离，测试主题使用inhand/examine/#；生产用inhand/#
+    keep-alive-interval: 60
+    connection-timeout: 10
+    action-timeout: 10
+    clean-session: true
