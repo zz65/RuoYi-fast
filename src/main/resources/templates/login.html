@@ -29,22 +29,30 @@
                         <h1><img alt="[ 若依 ]" src="../static/ruoyi.png" th:src="@{/ruoyi.png}"></h1>
                     </div>-->
                     <div class="m-b"></div>
-                    <!--<h4>欢迎使用 <strong>若依 后台管理系统</strong></h4>-->
-          <!--          <ul class="m-b">
-                        <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> SpringBoot</li>
-                        <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> Mybatis</li>
-                        <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> Shiro</li>
-                        <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> Thymeleaf</li>
-                        <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> Bootstrap</li>
-                    </ul>-->
+                    <!--
+                        <h4>欢迎使用 <strong>若依 后台管理系统</strong></h4>
+                        <ul class="m-b">
+                            <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> SpringBoot</li>
+                            <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> Mybatis</li>
+                            <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> Shiro</li>
+                            <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> Thymeleaf</li>
+                            <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> Bootstrap</li>
+                        </ul>
+                    -->
+                    <h4>欢迎使用 <strong>设备管理系统</strong></h4>
+                    <ul class="m-b">
+                        <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> 设备管理</li>
+                        <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> 在线统计</li>
+                        <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> 实时监控</li>
+                        <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> 远程控制</li>
+                    </ul>
                     <strong th:if="${isAllowRegister}">还没有账号？ <a th:href="@{/register}">立即注册&raquo;</a></strong>
                 </div>
             </div>
             <div class="col-sm-5">
                 <form id="signupForm" autocomplete="off">
-                    <!--<h4 class="no-margins">登录：</h4>-->
-                    <!--<p class="m-t-md">你若不离不弃，我必生死相依</p>-->
-                    <h3>欢迎使用<strong>设备管理系统</strong></h3>
+                    <h4 class="no-margins">登录：</h4>
+                    <p class="m-t-md">你若不离不弃，我必生死相依</p>
 
                     <input type="text"     name="username" class="form-control uname"     placeholder="用户名" value="admin"    />
                     <input type="password" name="password" class="form-control pword"     placeholder="密码"   value="admin123" />
