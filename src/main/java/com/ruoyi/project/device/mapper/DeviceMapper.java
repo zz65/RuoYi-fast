@@ -6,8 +6,10 @@ import java.util.List;
 
 /**
  * 设备表 数据层
- * 
- * @author ruoyi
+ *
+ * @author zhuzhen
+ * @date 2025/2/17 17:25
+ * @description: 详细说明
  */
 public interface DeviceMapper
 {
@@ -58,7 +60,7 @@ public interface DeviceMapper
      * @param device
      * @return 集合信息
      */
-    List<Device> selectPageList(Device device);
+    List<Device> selectList(Device device);
 
     /**
      * 通过ID查询
