@@ -926,9 +926,9 @@ CREATE TABLE IF NOT EXISTS iot_device (
     first_online_time datetime                                          comment '首次上线时间',
     status            char(1)     default '0'                           comment '设备状态（0正常 1停用）',
     del_flag          char(1)     default '0'                           comment '删除标志（0代表存在 2代表删除）',
-    create_by         varchar(64) default ''                            comment '创建者',
+    create_by         varchar(64) default ''                            comment '创建者的登录账号',
     create_time 	  datetime                                          comment '创建时间',
-    update_by         varchar(64) default ''                            comment '更新者',
+    update_by         varchar(64) default ''                            comment '更新者的登录账号',
     update_time       datetime                                          comment '更新时间',
     PRIMARY KEY (id)
 ) engine=innodb comment = '设备表';
@@ -949,4 +949,4 @@ CREATE TABLE IF NOT EXISTS iot_log_device_operate (
     PRIMARY KEY (id)
 ) engine=innodb comment = '电焊机操作日志表';
 create index idx_log_device_operate_operate_start_time on iot_log_device_operate(operate_start_time);
-create index idx_log_device_operate_operate_user_id on iot_log_device_operate(operate_user_id);
+create index idx_log_device_operate_operate_user_name on iot_log_device_operate(operate_user_name);
