@@ -1,6 +1,7 @@
 package com.ruoyi.project.device.mapper;
 
 import com.ruoyi.project.device.domain.Device;
+import com.ruoyi.project.device.domain.vo.DeviceVo;
 
 import java.util.List;
 
@@ -63,12 +64,20 @@ public interface DeviceMapper
     Device checkSnUnique(String sn);
 
     /**
-     * 根据条件分页查询列表
+     * 根据条件查询列表
      *
      * @param device
      * @return 集合信息
      */
     List<Device> selectList(Device device);
+
+    /**
+     * 根据条件分页查询列表
+     *
+     * @param device
+     * @return 集合信息
+     */
+    List<DeviceVo> selectPageList(Device device);
 
     /**
      * 通过ID查询

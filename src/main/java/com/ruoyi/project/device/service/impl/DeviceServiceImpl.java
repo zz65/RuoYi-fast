@@ -8,16 +8,22 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.security.ShiroUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.common.utils.text.Convert;
+import com.ruoyi.project.common.cache.GlobalDeviceRealTimeCache;
 import com.ruoyi.project.device.domain.Device;
+import com.ruoyi.project.device.domain.vo.DeviceVo;
+import com.ruoyi.project.device.enums.OnlineState;
 import com.ruoyi.project.device.mapper.DeviceMapper;
 import com.ruoyi.project.device.service.IDeviceService;
 import com.ruoyi.project.system.role.domain.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 类的概要说明
@@ -107,6 +113,47 @@ public class DeviceServiceImpl implements IDeviceService {
             return null;
         }
         List<Device> list = deviceMapper.selectList(device);
+        return list;
+    }
+
+    @Override
+    public List<DeviceVo> selectPageList(Device device) {
+        if (device == null) {
+            return null;
+        }
+        List<DeviceVo> list = deviceMapper.selectPageList(device);
+        if (!CollectionUtils.isEmpty(list)) {
+             list.stream().forEach(i -> {
+                 i.setName(i.getName());
+                 i.setCode(i.getCode());
+                 i.setSn(i.getSn());
+                 i.setFirstOnlineTime(i.getFirstOnlineTime());
+                 i.setStatus(i.getStatus());
+                 i.setCreateTime(i.getCreateTime());
+                 i.setCreateBy(i.getCreateBy());
+                 i.setUpdateTime(i.getUpdateTime());
+                 i.setUpdateBy(i.getUpdateBy());
+
+                DeviceVo cache = GlobalDeviceRealTimeCache.get(i.getSn());
+                //实体类之外的扩展属性
+                if (cache != null) {
+                    if (cache.getLastHeatbeatTime() != null && cache.getLastHeatbeatTime().isAfter(LocalDateTime.now().plusMinutes(-10))) {
+                        //最后一次心跳在10min以内就是在线
+                        i.setOnlineState(OnlineState.ONLINE);
+                    }
+
+                    i.setVoltage(cache.getVoltage());
+                    i.setCurrent(cache.getCurrent());
+                    i.setTurnOnTime(cache.getTurnOnTime());
+                    i.setTurnOffTime(cache.getTurnOffTime());
+                    i.setOperator(cache.getOperator());
+                    i.setOperatorNo(cache.getOperatorNo());
+                }
+                if (!OnlineState.ONLINE.equals(i.getOnlineState())) {
+                    i.setOnlineState(OnlineState.OFFLINE);
+                }
+            });
+        }
         return list;
     }
 

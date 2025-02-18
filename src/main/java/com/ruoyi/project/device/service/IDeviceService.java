@@ -1,6 +1,7 @@
 package com.ruoyi.project.device.service;
 
 import com.ruoyi.project.device.domain.Device;
+import com.ruoyi.project.device.domain.vo.DeviceVo;
 
 import java.util.List;
 
@@ -60,6 +61,13 @@ public interface IDeviceService {
      * @return 集合
      */
     List<Device> selectList(Device device);
+
+    /**
+     *
+     * @param device
+     * @return
+     */
+    List<DeviceVo> selectPageList(Device device);
 
     /**
      * 通过ID查询

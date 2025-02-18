@@ -62,13 +62,25 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<result property="updateBy"            column="update_by"       />
 	</resultMap>
 
+	<resultMap type="DeviceVo" id="DeviceVoResult">
+		<id     property="id"                  column="id"         />
+		<result property="name"                column="name"         />
+		<result property="code"                column="code"         />
+		<result property="sn"                  column="sn"         />
+		<result property="firstOnlineTime"     column="first_online_time"      />
+		<result property="status"              column="status"       />
+		<result property="createTime"          column="create_time"       />
+		<result property="createBy"            column="create_by"       />
+		<result property="updateTime"          column="update_time"       />
+		<result property="updateBy"            column="update_by"       />
+	</resultMap>
 
-	<sql id="selectDeviceInfo">
+	<sql id="DeviceSelectSql">
 		select d.id, d.name, d.code, d.sn, d.first_online_time, d.status, d.create_time from iot_device d
 	</sql>
 
 	<select id="selectList" parameterType="Device" resultMap="DeviceResult">
-		<include refid="selectDeviceInfo"/>
+		<include refid="DeviceSelectSql"/>
 		where d.del_flag = '0'
 		<if test="name != null and name != '' ">
 			AND d.name LIKE CONCAT('%', #{name}, '%')
@@ -86,6 +98,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		${params.dataScope}
 	</select>
 
+	<select id="selectPageList" parameterType="DeviceVo" resultMap="DeviceVoResult">
+		<include refid="DeviceSelectSql"/>
+		where d.del_flag = '0'
+		<if test="name != null and name != '' ">
+			AND d.name LIKE CONCAT('%', #{name}, '%')
+		</if>
+		<if test="status != null and status != '' ">
+			AND d.status = #{status}
+		</if>
+		<if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+			and date_format(d.create_time,'%Y%m%d') &gt;= date_format(#{params.beginTime},'%Y%m%d')
+		</if>
+		<if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+			and date_format(d.create_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d')
+		</if>
+		<!-- 数据范围过滤 -->
+		${params.dataScope}
+	</select>
 
 	<select id="checkNameUnique" parameterType="String" resultMap="DeviceResult">
 		select id, name from iot_device where name=#{name} and del_flag = '0' limit 1
@@ -96,7 +126,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 
 	<select id="selectById" parameterType="Long" resultMap="DeviceResult">
-		<include refid="selectDeviceInfo"/>
+		<include refid="DeviceSelectSql"/>
 		where d.id = #{id}
 	</select>
 </mapper> 

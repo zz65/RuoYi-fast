@@ -7,13 +7,17 @@ import com.ruoyi.framework.aspectj.lang.enums.BusinessType;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.framework.web.page.TableDataInfo;
+import com.ruoyi.project.common.cache.GlobalDeviceRealTimeCache;
 import com.ruoyi.project.device.domain.Device;
+import com.ruoyi.project.device.domain.vo.DeviceVo;
+import com.ruoyi.project.device.enums.OnlineState;
 import com.ruoyi.project.device.service.IDeviceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,7 +25,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 类的概要说明
@@ -168,7 +174,7 @@ public class DeviceController extends BaseController
     public TableDataInfo list(Device device)
     {
         startPage();
-        List<Device> list = deviceService.selectList(device);
+        List<DeviceVo> list = deviceService.selectPageList(device);
         return getDataTable(list);
     }
 

@@ -73,6 +73,13 @@
 		        columns: [{
 		            checkbox: true
 		        },
+				{
+					title: '在线状态',
+					align: 'center',
+					formatter: function (value, row, index) {
+						return onlineStatusTools(row);
+					}
+				},
 		        {
 		            field: 'code',
 		            title: '设备编号'
@@ -87,8 +94,32 @@
 					title: '设备序列号'
 				},
 				{
+					field: 'voltage',
+					title: '焊接电压'
+				},
+				{
+					field: 'current',
+					title: '焊接电流'
+				},
+				{
 					field: 'firstOnlineTime',
 					title: '首次开机时间'
+				},
+				{
+					field: 'turnOnTime',
+					title: '首次开机时间'
+				},
+				{
+					field: 'turnOffTime',
+					title: '首次关机时间'
+				},
+				{
+					field: 'operator',
+					title: '焊工姓名'
+				},
+				{
+					field: 'operatorNo',
+					title: '焊工工号'
 				},
 		        {
 		        	visible: editFlag == 'hidden' ? false : true,
@@ -120,7 +151,16 @@
 		    };
 		    $.table.init(options);
 		});
-		
+
+		/* 设备在线状态显示 */
+		function onlineStatusTools(row) {
+			if (row.onlineState == 'ONLINE') {
+				return '<span style=\"color:green\">在线</span> ';
+			} else {
+				return '<span style=\"color:red\">离线</span> ';
+			}
+		}
+
 		/* 设备状态显示 */
 		function statusTools(row) {
 		    if (row.status == 1) {
