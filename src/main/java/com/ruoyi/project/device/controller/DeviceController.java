@@ -1,5 +1,7 @@
 package com.ruoyi.project.device.controller;
 
+import com.ruoyi.common.constant.ErrorConstants;
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.framework.aspectj.lang.annotation.Log;
 import com.ruoyi.framework.aspectj.lang.enums.BusinessType;
 import com.ruoyi.framework.web.controller.BaseController;
@@ -52,7 +54,7 @@ public class DeviceController extends BaseController
     /**
      * 新增设备
      */
-    @RequiresPermissions("system:device:add")
+    @RequiresPermissions("device:list:add")
     @GetMapping("/add")
     public String add()
     {
@@ -62,21 +64,23 @@ public class DeviceController extends BaseController
     /**
      * 新增保存设备
      */
-    @RequiresPermissions("system:device:add")
+    @RequiresPermissions("device:list:add")
     @Log(title = "设备管理", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     @ResponseBody
     public AjaxResult addSave(@Validated Device device)
     {
-        if (!deviceService.checkNameUnique(device.getName()))
+        if (!deviceService.checkNameUnique(device))
         {
             return error("新增设备'" + device.getName() + "'失败，设备名称已存在");
+        } else if (!deviceService.checkSnUnique(device)) {
+            return error("新增设备'" + device.getSn() + "'失败，设备序列号已存在");
         }
         return toAjax(deviceService.insert(device));
 
     }
 
-    @RequiresPermissions("system:device:remove")
+    @RequiresPermissions("device:list:remove")
     @Log(title = "设备管理", businessType = BusinessType.DELETE)
     @PostMapping("/remove")
     @ResponseBody
@@ -88,7 +92,7 @@ public class DeviceController extends BaseController
     /**
      * 修改设备
      */
-    @RequiresPermissions("system:device:edit")
+    @RequiresPermissions("device:list:edit")
     @GetMapping("/edit/{id}")
     public String edit(@PathVariable("id") Long id, ModelMap mmap)
     {
@@ -101,7 +105,7 @@ public class DeviceController extends BaseController
     /**
      * 修改保存设备
      */
-    @RequiresPermissions("system:device:edit")
+    @RequiresPermissions("device:list:edit")
     @Log(title = "设备管理", businessType = BusinessType.UPDATE)
     @PostMapping("/edit")
     @ResponseBody
@@ -110,9 +114,11 @@ public class DeviceController extends BaseController
         //todo 数据权限
         // roleService.checkRoleAllowed(device);
         // roleService.checkRoleDataScope(device.getRoleId());
-        if (!deviceService.checkNameUnique(device.getName()))
+        if (!deviceService.checkNameUnique(device))
         {
             return error("修改设备'" + device.getName() + "'失败，设备名称已存在");
+        } else if (!deviceService.checkSnUnique(device)) {
+            return error("修改设备'" + device.getSn() + "'失败，设备序列号已存在");
         }
         return toAjax(deviceService.update(device));
     }
@@ -124,15 +130,24 @@ public class DeviceController extends BaseController
     @ResponseBody
     public boolean checkNameUnique(Device device)
     {
-        return deviceService.checkNameUnique(device.getName());
+        return deviceService.checkNameUnique(device);
     }
 
+    /**
+     * 校验设备序列号
+     */
+    @PostMapping("/checkSnUnique")
+    @ResponseBody
+    public boolean checkSnUnique(Device device)
+    {
+        return deviceService.checkSnUnique(device);
+    }
 
     /**
      * 设备状态修改
      */
     @Log(title = "设备管理", businessType = BusinessType.UPDATE)
-    @RequiresPermissions("system:device:edit")
+    @RequiresPermissions("device:list:edit")
     @PostMapping("/changeStatus")
     @ResponseBody
     public AjaxResult changeStatus(Device device)
@@ -140,13 +155,14 @@ public class DeviceController extends BaseController
         //todo 数据权限
         // roleService.checkRoleAllowed(device);
         // roleService.checkRoleDataScope(device.getRoleId());
-        //todo service未实现
-        // return toAjax(deviceService.changeStatus(device));
-        return null;
+        if (device == null) {
+            throw new ServiceException(ErrorConstants.PARAM_MISMATCH);
+        }
+        return toAjax(deviceService.changeStatus(device.getId(), device.getStatus()));
     }
 
 
-    @RequiresPermissions("system:device:list")
+    @RequiresPermissions("device:list:list")
     @PostMapping("/list")
     @ResponseBody
     public TableDataInfo list(Device device)
@@ -157,7 +173,7 @@ public class DeviceController extends BaseController
     }
 
     // @Log(title = "设备管理", businessType = BusinessType.EXPORT)
-    // @RequiresPermissions("system:device:export")
+    // @RequiresPermissions("device:list:export")
     // @PostMapping("/export")
     // @ResponseBody
     // public AjaxResult export(Device device)

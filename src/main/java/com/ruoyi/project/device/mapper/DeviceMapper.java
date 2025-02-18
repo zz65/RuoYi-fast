@@ -55,6 +55,14 @@ public interface DeviceMapper
     Device checkNameUnique(String name);
 
     /**
+     * 校验设备序列号是否唯一
+     *
+     * @param sn 设备序列号
+     * @return 结果
+     */
+    Device checkSnUnique(String sn);
+
+    /**
      * 根据条件分页查询列表
      *
      * @param device

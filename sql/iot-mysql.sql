@@ -907,6 +907,9 @@ commit;
 
 
 -- ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓ 自定义，业务部分 ↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
+DROP TABLE IF EXISTS iot_role_device;
+DROP TABLE IF EXISTS iot_device;
+DROP TABLE IF EXISTS iot_log_device_operate;
 
 -- 数据权限表-角色和设备关联表
 CREATE TABLE IF NOT EXISTS iot_role_device (
@@ -922,7 +925,8 @@ CREATE TABLE IF NOT EXISTS iot_device (
     id                bigint                   not null  auto_increment comment '主键',
     -- tenant_id         varchar(20)              not null                  comment '租户编号', -- 演示暂时不用，正式版本再加
     name              varchar(20)              not null                 comment '设备名称',
-    code              varchar(20)              not null                 comment '设备编号',
+    code              varchar(20)                                       comment '设备编号',
+    sn                varchar(50)              not null                 comment '设备序列号',
     first_online_time datetime                                          comment '首次上线时间',
     status            char(1)     default '0'                           comment '设备状态（0正常 1停用）',
     del_flag          char(1)     default '0'                           comment '删除标志（0代表存在 2代表删除）',
