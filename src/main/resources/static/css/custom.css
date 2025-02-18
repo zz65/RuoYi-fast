@@ -1,0 +1,8 @@
+/* 自定义样式 20250208创建 */
+
+/* 设置超出内容隐藏并显示省略号 */
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

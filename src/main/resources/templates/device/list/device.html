@@ -2,6 +2,7 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
 	<th:block th:include="include :: header('设备列表')" />
+	<link th:href="@{/css/custom.css}" rel="stylesheet"/>
 </head>
 <body class="gray-bg">
 	<div class="container-div">
@@ -55,6 +56,7 @@
 		</div>
 	</div>
 	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: bootstrap-table-fixed-columns-js" />
 	<script th:inline="javascript">
 		var editFlag = [[${@permission.hasPermi('device:list:edit')}]];
 		var removeFlag = [[${@permission.hasPermi('device:list:remove')}]];
@@ -62,102 +64,120 @@
 		
 
 		$(function() {
-		    var options = {
-		        url: prefix + "/list",
-		        createUrl: prefix + "/add",
-		        updateUrl: prefix + "/edit/{id}",
-		        removeUrl: prefix + "/remove",
-		        exportUrl: prefix + "/export",
-		        sortName: "createTime",
-		        modalName: "设备",
-		        columns: [{
-		            checkbox: true
-		        },
-				{
-					title: '在线状态',
-					align: 'center',
-					formatter: function (value, row, index) {
-						return onlineStatusTools(row);
-					}
+			var options = {
+				url: prefix + "/list",
+				createUrl: prefix + "/add",
+				updateUrl: prefix + "/edit/{id}",
+				removeUrl: prefix + "/remove",
+				exportUrl: prefix + "/export",
+				sortName: "createTime",
+				sortOrder: "desc",
+				modalName: "设备",
+				fixedColumns: true,
+				fixedNumber: 3,
+				fixedRightNumber: 1,
+				columns: [{
+					checkbox: true
 				},
-		        {
-		            field: 'code',
-		            title: '设备编号'
-		        },
-		        {
-		            field: 'name',
-		            title: '设备名称',
-		            sortable: true
-		        },
-				{
-					field: 'sn',
-					title: '设备序列号'
-				},
-				{
-					field: 'voltage',
-					title: '焊接电压(V)'
-				},
-				{
-					field: 'current',
-					title: '焊接电流(A)'
-				},
-				{
-					field: 'firstOnlineTime',
-					title: '首次开机时间'
-				},
-				{
-					field: 'turnOnTime',
-					title: '开机时间'
-				},
-				{
-					field: 'turnOffTime',
-					title: '关机时间'
-				},
-				{
-					field: 'operator',
-					title: '焊工姓名'
-				},
-				{
-					field: 'operatorNo',
-					title: '焊工工号'
-				},
-		        {
-		        	visible: editFlag == 'hidden' ? false : true,
-		        	title: '设备状态',
-		        	align: 'center',
-		        	formatter: function (value, row, index) {
-		        		return statusTools(row);
-		        	}
-		        },
-		        {
-		            field: 'createTime',
-		            title: '创建时间',
-		            sortable: true
-		        },
-		        {
-		            title: '操作',
-		            align: 'center',
-		            formatter: function(value, row, index) {
-		            	if (row.id != 1) {
-		                    var actions = [];
-		                    actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
-		                    actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a> ');
-		                    return actions.join('');
-		            	} else {
-		                    return "";
-		                }
-		            }
-		        }]
-		    };
-		    $.table.init(options);
+					{
+						title: '在线状态',
+						align: 'center',
+						formatter: function (value, row, index) {
+							return onlineStatusTools(row);
+						},
+						width: 80
+					},
+					{
+						field: 'code',
+						title: '设备编号',
+						width: 80
+					},
+					{
+						field: 'name',
+						title: '设备名称',
+						sortable: true
+					},
+					{
+						field: 'sn',
+						title: '设备序列号',
+						width: 100, // 设置列宽度
+						formatter: function (value, row, index) {
+							return `<span class="ellipsis" data-original="${value}">${value}</span>`;
+						}
+					},
+					{
+						field: 'voltage',
+						title: '焊接电压(V)'
+					},
+					{
+						field: 'current',
+						title: '焊接电流(A)'
+					},
+					{
+						field: 'firstOnlineTime',
+						title: '首次开机时间',
+						width: 140
+					},
+					{
+						field: 'turnOnTime',
+						title: '开机时间',
+						width: 140
+					},
+					{
+						field: 'turnOffTime',
+						title: '关机时间',
+						width: 140
+					},
+					{
+						field: 'operator',
+						title: '焊工姓名'
+					},
+					{
+						field: 'operatorNo',
+						title: '焊工工号'
+					},
+					{
+						visible: editFlag == 'hidden' ? false : true,
+						title: '设备状态',
+						align: 'center',
+						formatter: function (value, row, index) {
+							return statusTools(row);
+						},
+						width: 60
+					},
+					{
+						field: 'createTime',
+						title: '创建时间',
+						sortable: true,
+						width: 140
+					},
+					{
+						title: '操作',
+						align: 'center',
+						formatter: function(value, row, index) {
+							if (row.id != 1) {
+								var actions = [];
+								actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+								actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a> ');
+								return actions.join('');
+							} else {
+								return "";
+							}
+						},
+						width: 140
+					}]
+			};
+			$.table.init(options);
 		});
 
 		/* 设备在线状态显示 */
 		function onlineStatusTools(row) {
 			if (row.onlineState == 'ONLINE') {
-				return '<span style=\"color:green\">在线</span> ';
+				return '<span class="badge badge-primary">在线</span>';
+			} else if (row.onlineState == 'OFFLINE') {
+				return '<span class="badge badge-danger">离线</span>';
 			} else {
-				return '<span style=\"color:red\">离线</span> ';
+				return '<span class="badge badge-danger">离线</span>';
 			}
 		}
 

@@ -36,7 +36,7 @@ public final class GlobalDeviceRealTimeCache {
      */
     public static DeviceVo get(String sn) {
         DeviceVo deviceVo = realTimeMap.get(sn);
-        // //fixme 测试代码，正式请删除
+        // // fixme 测试代码，正式请删除
         // if (deviceVo == null) {
         //     deviceVo = new DeviceVo();
         //     deviceVo.setLastHeatbeatTime(LocalDateTime.now());
