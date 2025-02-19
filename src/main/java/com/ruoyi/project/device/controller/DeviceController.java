@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 类的概要说明
+ * 设备列表 控制器
  *
  * @author zhuzhen
  * @date 2025/2/17 15:25
