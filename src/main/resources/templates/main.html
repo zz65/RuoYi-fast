@@ -28,6 +28,19 @@
             display: table;
             clear: both;
         }
+        /* 自定义卡片样式 */
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            margin: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16);
+            transition: all 0.3s;
+        }
+        .flex-column {
+            display: flex;
+            flex-direction: column;
+        }
     </style>
 </head>
 
@@ -71,70 +84,36 @@
                       </li>
                       <li class="page-item"><a class="page-link" href="#">尾页</a></li>
                   </ul>-->
+                <!-- 卡片容器 -->
+                <div id="card-container" class="row"></div>
 
                 <!-- 卡片列表 -->
-                <table
-                        id="table"
-                        data-toggle="table"
-                        data-height=""
-                        data-card-view="true"
-                >
-                    <thead>
-                    <tr>
-                        <th data-field="id">ID</th>
-                        <th data-field="name">Item Name</th>
-                        <th data-field="price">Item Price</th>
-                    </tr>
-                    </thead>
-                </table>
+                <!--            <table
+                                    id="table"
+                                    data-toggle="table"
+                                    data-height=""
+                                    data-card-view="true"
+                            >
+                                <thead>
+                                <tr>
+                                    <th data-field="id">ID</th>
+                                    <th data-field="name">Item Name</th>
+                                    <th data-field="price">Item Price</th>
+                                </tr>
+                                </thead>
+                            </table>-->
 
-                <div id="card-list">
-                    <!-- 卡片 1 -->
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">Card 1 Title</h3>
-                        </div>
-                        <div class="panel-body">
-                            Card 1 content goes here.
-                        </div>
-                    </div>
-                    <!-- 卡片 2 -->
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">Card 2 Title</h3>
-                        </div>
-                        <div class="panel-body">
-                            Card 2 content goes here.
-                        </div>
-                    </div>
-                    <!-- 卡片 3 -->
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">Card 3 Title</h3>
-                        </div>
-                        <div class="panel-body">
-                            Card 3 content goes here.
-                        </div>
-                    </div>
-                    <!-- 卡片 4 -->
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">Card 4 Title</h3>
-                        </div>
-                        <div class="panel-body">
-                            Card 4 content goes here.
-                        </div>
-                    </div>
-                    <!-- 卡片 5 -->
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">Card 5 Title</h3>
-                        </div>
-                        <div class="panel-body">
-                            Card 5 content goes here.
-                        </div>
-                    </div>
-                </div>
+                <!--           <div id="card-list">
+                               &lt;!&ndash; 卡片 1 &ndash;&gt;
+                               <div class="panel panel-default">
+                                   <div class="panel-heading">
+                                       <h3 class="panel-title">Card 1 Title</h3>
+                                   </div>
+                                   <div class="panel-body">
+                                       Card 1 content goes here.
+                                   </div>
+                               </div>
+                           </div>-->
             </div>
         </div>
     </div>
@@ -143,38 +122,80 @@
     <script th:src="@{/js/bootstrap.min.js}"></script>
     <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>-->
     <script th:inline="javascript">
+        var data = [
+            {
+                id: 0,
+                name: 'Item 0',
+                price: '$0'
+            },
+            {
+                id: 1,
+                price: '$1'
+            },
+            {
+                id: 2,
+                name: 'Item 2',
+                price: '$2'
+            },
+            {
+                id: 3,
+                name: 'Item 3',
+                price: '$3'
+            },
+            {
+                id: 4,
+                name: 'Item 4',
+                price: '$4'
+            },
+            {
+                id: 5,
+                name: 'Item 5',
+                price: '$5'
+            },
+            {
+                id: 5,
+                name: 'Item 5',
+                price: '$5'
+            },
+            {
+                id: 5,
+                name: 'Item 5',
+                price: '$5'
+            },
+            {
+                id: 5,
+                name: 'Item 5',
+                price: '$5'
+            }
+        ];
+    
+        // 渲染卡片
+        function renderCards(data) {
+            const container = $('#card-container').empty();
+            data.forEach(item => {
+                const col = $('<div>').addClass('col-xs-6 col-sm-4 col-md-2');
+                const card = $('<div>').addClass('card');
+
+                card.append(`
+                            <div class="flex-column">
+                                <div>
+                                    <p>名称</p>
+                                    <p>价格</p>
+                                </div>
+                                <div>
+                                    <p>${item.name}</p>
+                                    <p>${item.price}</p>
+                                </div>
+                            </div>
+                        `);
+
+                col.append(card);
+                container.append(col);
+            });
+        }
+
         $(function() {
-            var data = [
-                {
-                    id: 0,
-                    name: 'Item 0',
-                    price: '$0'
-                },
-                {
-                    id: 1,
-                    price: '$1'
-                },
-                {
-                    id: 2,
-                    name: 'Item 2',
-                    price: '$2'
-                },
-                {
-                    id: 3,
-                    name: 'Item 3',
-                    price: '$3'
-                },
-                {
-                    id: 4,
-                    name: 'Item 4',
-                    price: '$4'
-                },
-                {
-                    id: 5,
-                    name: 'Item 5',
-                    price: '$5'
-                }
-            ];
+            renderCards(data);
             $('#table').bootstrapTable('load', data);
         });
     </script>
