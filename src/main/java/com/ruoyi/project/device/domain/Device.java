@@ -42,8 +42,9 @@ public class Device extends BaseEntity {
     private String sn;
 
     /** 首次开机时间 */
-    @Excel(name = "首次开机时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    /** 显示只需显示开机日期即可 */
+    @Excel(name = "首次开机日期", width = 30, dateFormat = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime firstOnlineTime;
 
     /** 状态（0正常 1停用） */

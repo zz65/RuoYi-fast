@@ -36,17 +36,17 @@ public final class GlobalDeviceRealTimeCache {
      */
     public static DeviceVo get(String sn) {
         DeviceVo deviceVo = realTimeMap.get(sn);
-        // // fixme 测试代码，正式请删除
-        // if (deviceVo == null) {
-        //     deviceVo = new DeviceVo();
-        //     deviceVo.setLastHeatbeatTime(LocalDateTime.now());
-        //     deviceVo.setVoltage(60.0);
-        //     deviceVo.setCurrent(100.0);
-        //     deviceVo.setTurnOnTime(LocalDateTime.now());
-        //     deviceVo.setTurnOffTime(LocalDateTime.now());
-        //     deviceVo.setOperator("李白");
-        //     deviceVo.setOperatorNo("000023");
-        // }
+        // fixme 测试代码，正式请删除
+        if (deviceVo == null) {
+            deviceVo = new DeviceVo();
+            deviceVo.setLastHeatbeatTime(LocalDateTime.now());
+            deviceVo.setVoltage(60.0);
+            deviceVo.setCurrent(100.0);
+            deviceVo.setTurnOnTime(LocalDateTime.now());
+            deviceVo.setTurnOffTime(LocalDateTime.now());
+            deviceVo.setOperator("李白");
+            deviceVo.setOperatorNo("000023");
+        }
         return deviceVo;
     }
 

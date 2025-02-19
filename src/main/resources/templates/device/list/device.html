@@ -15,7 +15,7 @@
 								设备名称：<input type="text" name="name"/>
 							</li>
 							<li>
-								设备状态：<select name="status" th:with="type=${@dict.getType('sys_normal_disable')}">
+								启用状态：<select name="status" th:with="type=${@dict.getType('sys_normal_disable')}">
 									<option value="">所有</option>
 									<option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
 								</select>
@@ -74,7 +74,7 @@
 				sortOrder: "desc",
 				modalName: "设备",
 				fixedColumns: true,
-				fixedNumber: 3,
+				fixedNumber: 4,
 				fixedRightNumber: 1,
 				columns: [{
 					checkbox: true
@@ -95,28 +95,36 @@
 					{
 						field: 'name',
 						title: '设备名称',
-						sortable: true
+						sortable: true,
+						width: 100,
+						formatter: ovverflowEllipsisToolTipFormatter,
+						class: 'ellipsis'
 					},
 					{
 						field: 'sn',
 						title: '设备序列号',
-						width: 100, // 设置列宽度
-						formatter: function (value, row, index) {
-							return `<span class="ellipsis" data-original="${value}">${value}</span>`;
-						}
+						width: 100,
+						formatter: ovverflowEllipsisToolTipFormatter,
+						class: 'ellipsis'
 					},
 					{
 						field: 'voltage',
-						title: '焊接电压(V)'
+						title: '焊接电压(V)',
+						width: 90,
+						formatter: ovverflowEllipsisToolTipFormatter,
+						class: 'ellipsis'
 					},
 					{
 						field: 'current',
-						title: '焊接电流(A)'
+						title: '焊接电流(A)',
+						width: 90,
+						formatter: ovverflowEllipsisToolTipFormatter,
+						class: 'ellipsis'
 					},
 					{
 						field: 'firstOnlineTime',
-						title: '首次开机时间',
-						width: 140
+						title: '首次开机日期',
+						width: 100
 					},
 					{
 						field: 'turnOnTime',
@@ -130,15 +138,21 @@
 					},
 					{
 						field: 'operator',
-						title: '焊工姓名'
+						title: '焊工姓名',
+						width: 100,
+						formatter: ovverflowEllipsisToolTipFormatter,
+						class: 'ellipsis'
 					},
 					{
 						field: 'operatorNo',
-						title: '焊工工号'
+						title: '焊工工号',
+						width: 100,
+						formatter: ovverflowEllipsisToolTipFormatter,
+						class: 'ellipsis'
 					},
 					{
 						visible: editFlag == 'hidden' ? false : true,
-						title: '设备状态',
+						title: '启用状态',
 						align: 'center',
 						formatter: function (value, row, index) {
 							return statusTools(row);
@@ -168,7 +182,30 @@
 					}]
 			};
 			$.table.init(options);
+
+			//配合ellipsis样式，设置单元格超出列宽的内容隐藏并显示省略号
+			$("#bootstrap-table").css("table-layout", "fixed");
+			// 设置鼠标悬停展示全部内容
+			$('[data-toggle="tooltip"]').tooltip();
 		});
+
+		/**
+		 * 获取文本格式：配合ellipsis样式，设置单元格超出列宽的内容隐藏并显示省略号，鼠标悬停显示完整内容
+		 * @param val
+		 * @param rowData
+		 * @param index
+		 * @returns {string}
+		 */
+		function ovverflowEllipsisToolTipFormatter(val, rowData, index) {
+			if (val == '' || val == null) {
+				return;
+			}
+			var span = document.createElement('span');
+			span.setAttribute('title', val);
+			span.setAttribute('data-toggle', 'tooltip'); // 添加data-toggle属性,设置鼠标悬停
+			span.innerHTML = val;
+			return span.outerHTML;
+		}
 
 		/* 设备在线状态显示 */
 		function onlineStatusTools(row) {

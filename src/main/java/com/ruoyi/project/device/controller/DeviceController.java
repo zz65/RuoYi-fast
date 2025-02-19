@@ -150,7 +150,7 @@ public class DeviceController extends BaseController
     }
 
     /**
-     * 设备状态修改
+     * 启用状态修改
      */
     @Log(title = "设备管理", businessType = BusinessType.UPDATE)
     @RequiresPermissions("device:list:edit")

@@ -928,7 +928,7 @@ CREATE TABLE IF NOT EXISTS iot_device (
     code              varchar(20)                                       comment '设备编号',
     sn                varchar(50)              not null                 comment '设备序列号',
     first_online_time datetime                                          comment '首次上线时间',
-    status            char(1)     default '0'                           comment '设备状态（0正常 1停用）',
+    status            char(1)     default '0'                           comment '启用状态（0正常 1停用）',
     del_flag          char(1)     default '0'                           comment '删除标志（0代表存在 2代表删除）',
     create_by         varchar(64) default ''                            comment '创建者的登录账号',
     create_time 	  datetime                                          comment '创建时间',
