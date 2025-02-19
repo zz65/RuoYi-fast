@@ -13,6 +13,22 @@
 
     <th:block th:include="include :: header('首页')" />
     <link th:href="@{/css/custom.css}" rel="stylesheet"/>
+    <style>
+        /* 设置卡片列宽 */
+        .has-card-view tr{
+            width: calc(100% / 6);
+            float: left;
+            padding: 0 15px;
+            box-sizing: border-box;
+        }
+
+        /* 清除浮动 */
+        .has-card-view::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+    </style>
 </head>
 
 <body class="gray-bg">
@@ -36,8 +52,42 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="col-sm-12 select-table table-striped">
+                <!--默认分页效果-->
+                <!--  <ul class="pagination">
+                      <li class="page-item"><a class="page-link" href="#">首页</a></li>
+                      <li class="page-item">
+                          <a class="page-link" href="#"><span>&laquo;</span></a>
+                      </li>
+                      <li class="page-item"><a class="page-link" href="#">1</a></li>
+                      <li class="page-item"><a class="page-link" href="#">2</a></li>
+                      <li class="page-item"><a class="page-link" href="#">3</a></li>
+                      <li class="page-item"><a class="page-link" href="#">4</a></li>
+                      <li class="page-item"><a class="page-link" href="#">5</a></li>
+                      <li class="page-item">
+                          <a class="page-link" href="#"><span >&raquo;</span></a>
+                      </li>
+                      <li class="page-item"><a class="page-link" href="#">尾页</a></li>
+                  </ul>-->
 
                 <!-- 卡片列表 -->
+                <table
+                        id="table"
+                        data-toggle="table"
+                        data-height=""
+                        data-card-view="true"
+                >
+                    <thead>
+                    <tr>
+                        <th data-field="id">ID</th>
+                        <th data-field="name">Item Name</th>
+                        <th data-field="price">Item Price</th>
+                    </tr>
+                    </thead>
+                </table>
+
                 <div id="card-list">
                     <!-- 卡片 1 -->
                     <div class="panel panel-default">
@@ -89,9 +139,44 @@
         </div>
     </div>
     <th:block th:include="include :: footer" />
-    <script th:src="@{/js/jquery.min.js}"></script>
+    <!--<script th:src="@{/js/jquery.min.js}"></script>
     <script th:src="@{/js/bootstrap.min.js}"></script>
-    <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>
-
+    <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>-->
+    <script th:inline="javascript">
+        $(function() {
+            var data = [
+                {
+                    id: 0,
+                    name: 'Item 0',
+                    price: '$0'
+                },
+                {
+                    id: 1,
+                    price: '$1'
+                },
+                {
+                    id: 2,
+                    name: 'Item 2',
+                    price: '$2'
+                },
+                {
+                    id: 3,
+                    name: 'Item 3',
+                    price: '$3'
+                },
+                {
+                    id: 4,
+                    name: 'Item 4',
+                    price: '$4'
+                },
+                {
+                    id: 5,
+                    name: 'Item 5',
+                    price: '$5'
+                }
+            ];
+            $('#table').bootstrapTable('load', data);
+        });
+    </script>
 </body>
 </html>
