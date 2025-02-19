@@ -37,9 +37,20 @@
             box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16);
             transition: all 0.3s;
         }
-        .flex-column {
+        .flex-row {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+        }
+        .flex-item {
+            /*flex: 1;*/
+        }
+        .flex-item-key {
+            width: 50px;
+            text-align: right;
+        }
+        .flex-item-value {
+            width: 80px;
+            text-align: left;
         }
     </style>
 </head>
@@ -122,81 +133,56 @@
     <script th:src="@{/js/bootstrap.min.js}"></script>
     <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>-->
     <script th:inline="javascript">
-        var data = [
-            {
-                id: 0,
-                name: 'Item 0',
-                price: '$0'
-            },
-            {
-                id: 1,
-                price: '$1'
-            },
-            {
-                id: 2,
-                name: 'Item 2',
-                price: '$2'
-            },
-            {
-                id: 3,
-                name: 'Item 3',
-                price: '$3'
-            },
-            {
-                id: 4,
-                name: 'Item 4',
-                price: '$4'
-            },
-            {
-                id: 5,
-                name: 'Item 5',
-                price: '$5'
-            },
-            {
-                id: 5,
-                name: 'Item 5',
-                price: '$5'
-            },
-            {
-                id: 5,
-                name: 'Item 5',
-                price: '$5'
-            },
-            {
-                id: 5,
-                name: 'Item 5',
-                price: '$5'
-            }
-        ];
-    
-        // 渲染卡片
-        function renderCards(data) {
-            const container = $('#card-container').empty();
-            data.forEach(item => {
-                const col = $('<div>').addClass('col-xs-6 col-sm-4 col-md-2');
-                const card = $('<div>').addClass('card');
-
-                card.append(`
-                            <div class="flex-column">
-                                <div>
-                                    <p>名称</p>
-                                    <p>价格</p>
-                                </div>
-                                <div>
-                                    <p>${item.name}</p>
-                                    <p>${item.price}</p>
-                                </div>
-                            </div>
-                        `);
-
-                col.append(card);
-                container.append(col);
-            });
-        }
-
         $(function() {
+            var data = [];
+            for (let i = 0; i < 50; i++) {
+                if (i % 2 === 0) {
+                    data.push({
+                        id: i,
+                        name: 'Item ' + i,
+                        price: '$' + i
+                    })
+                } else {
+                    data.push({
+                        id: i,
+                        name: 'Item ' + 1111111111,
+                        price: '$' + i
+                    })
+                }
+                // data.push({
+                //     id: i,
+                //     name: 'Item ' + i,
+                //     price: '$' + i
+                // })
+            }
+
+            // 渲染卡片
+            function renderCards(data) {
+                const container = $('#card-container').empty();
+                data.forEach(item => {
+                    const col = $('<div>').addClass('col-xs-6 col-sm-4 col-md-2');
+                    const card = $('<div>').addClass('card').addClass("flex-row");
+                    card.append(`
+                                <div class="flex-item">
+                                    <div class="flex-item-key">名称：</div>
+                                    <div class="flex-item-key">价格：</div>
+                                </div>
+                                <div class="flex-item">
+                                    <div class="flex-item-value ellipsis" data-toggle="tooltip">${item.name}</div>
+                                    <div class="flex-item-value ellipsis" data-toggle="tooltip">${item.price}</div>
+                                </div>
+                            `);
+                    col.append(card);
+                    container.append(col);
+                });
+            }
+
             renderCards(data);
-            $('#table').bootstrapTable('load', data);
+            // 设置鼠标悬停展示全部内容
+            // $('[data-toggle="tooltip"]').tooltip();
+            $('.flex-item-value').tooltip();
+
+            /*$('#table').bootstrapTable('load', data);*/
         });
     </script>
 </body>
