@@ -65,6 +65,8 @@ public final class GlobalDeviceRealTimeCache {
             deviceVo.setTurnOnTime(turnOnTime);
             if (deviceVo.getTurnOffTime() != null && turnOnTime.isAfter(deviceVo.getTurnOffTime())) {
                 deviceVo.setTurnOffTime(null);
+                deviceVo.setOperator(null);
+                deviceVo.setOperatorNo(null);
             }
         }
         return deviceVo;

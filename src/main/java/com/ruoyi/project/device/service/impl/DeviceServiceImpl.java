@@ -137,7 +137,7 @@ public class DeviceServiceImpl implements IDeviceService {
                 DeviceVo cache = GlobalDeviceRealTimeCache.get(i.getSn());
                 //实体类之外的扩展属性
                 if (cache != null) {
-                    if (cache.getLastHeatbeatTime() != null && cache.getLastHeatbeatTime().isAfter(LocalDateTime.now().plusMinutes(-10))) {
+                    if (isOnline(cache.getLastHeatbeatTime())) {
                         //最后一次心跳在10min以内就是在线
                         i.setOnlineState(OnlineState.ONLINE);
                     }
@@ -188,5 +188,16 @@ public class DeviceServiceImpl implements IDeviceService {
             return Constants.NOT_UNIQUE;
         }
         return Constants.UNIQUE;
+    }
+
+    @Override
+    public boolean isOnline(LocalDateTime lastHeartbeatTime) {
+        if (lastHeartbeatTime == null) {
+            return false;
+        }
+        if (lastHeartbeatTime.isAfter(LocalDateTime.now().plusMinutes(-10))) {
+            return true;
+        }
+        return false;
     }
 }

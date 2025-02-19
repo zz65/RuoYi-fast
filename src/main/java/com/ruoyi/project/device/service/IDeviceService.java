@@ -3,6 +3,7 @@ package com.ruoyi.project.device.service;
 import com.ruoyi.project.device.domain.Device;
 import com.ruoyi.project.device.domain.vo.DeviceVo;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -92,4 +93,11 @@ public interface IDeviceService {
      * @return 结果
      */
     boolean checkSnUnique(Device device);
+
+    /**
+     * 根据设备的最后一次心跳时间判断设备是否在线
+     * @param lastHeartbeatTime
+     * @return
+     */
+    boolean isOnline(LocalDateTime lastHeartbeatTime);
 }
