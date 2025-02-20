@@ -940,17 +940,18 @@ create index idx_device_create_time on iot_device(create_time);
 create index idx_device_name on iot_device(name);
 
 
--- 电焊机操作日志表
+-- 电焊机开关机操作日志表
 CREATE TABLE IF NOT EXISTS iot_log_device_operate (
     id                 bigint                        not null   auto_increment comment '主键',
     -- tenant_id         varchar(20)                    not null                  comment '租户编号', -- 演示暂时不用，正式版本再加
-    operate_user_id    bigint                                                  comment '操作员系统id',
-    operate_user_name  varchar(20)                                             comment '操作员名称',
-    operate_start_time datetime                      not null                  comment '操作开始时间',
-    operate_end_time   datetime                      not null                  comment '操作结束时间',
+    device_id          varchar(50)                   not null                  comment '设备id',
+    operator           varchar(20)                   not null                  comment '操作员姓名',
+    operator_no        varchar(20)                                             comment '操作员工号',
+    operate_start_time datetime                                                comment '操作开始时间',
+    operate_end_time   datetime                                                comment '操作结束时间',
     create_time 	   datetime                                                comment '创建时间',
     update_time        datetime                                                comment '更新时间',
     PRIMARY KEY (id)
 ) engine=innodb comment = '电焊机操作日志表';
 create index idx_log_device_operate_operate_start_time on iot_log_device_operate(operate_start_time);
-create index idx_log_device_operate_operate_user_name on iot_log_device_operate(operate_user_name);
+create index idx_log_device_operate_operate_operator on iot_log_device_operate(operator);
