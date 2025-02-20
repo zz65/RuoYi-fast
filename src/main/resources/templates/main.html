@@ -41,11 +41,21 @@
             font-family: "Microsoft Yahei", Verdana, Simsun, "Segoe UI Web Light", "Segoe UI Light", "Segoe UI Web Regular", "Segoe UI", "Segoe UI Symbol", "Helvetica Neue", Arial;
             font-weight: bold;
             font-size: 14px;
-            width: 150px;
+            width: 110px;
             text-align: left;
         }
         .flex-item-seperate {
             height: 20px;
+        }
+        .onlineStateCount1,.panel-title-custom {
+            font-size: 17px;
+            font-weight: bold;
+            color: #1a1a1a;
+        }
+        div.panel {
+            margin-top: 60px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16);
         }
     </style>
 </head>
@@ -56,27 +66,32 @@
             <div class="col-sm-12 data-collapse">
                 <div class="row">
                     <div class="col-sm-2">
-                        <div class="">
+                        <div class="onlineStateCount">
                             <h3>设备总数：<span id="total" style="color: blue;"></span></h3>
                         </div>
                     </div>
                     <div class="col-sm-2">
-                        <div class="">
+                        <div class="onlineStateCount">
                             <h3>在线数：<span id="onlineCount" style="color: #1AB394;"></span></h3>
                         </div>
                     </div>
                     <div class="col-sm-2">
-                        <div class="">
+                        <div class="onlineStateCount">
                             <h3>离线数：<span id="offlineCount" style="color: #ED5565;"></span></h3>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-sm-12 select-table table-striped">
-                <!-- 卡片容器 -->
-                <div id="card-container" class="row"></div>
-
+            <!-- 面板容器 -->
+            <div class="panel panel-default clearfix">
+                <div class="panel-heading panel-title-custom">
+                    <h3 class="panel-title">电焊机状态实时列表</h3>
+                </div>
+                <div class="panel-body">
+                    <!-- 卡片容器 -->
+                    <div id="card-container" class="row"></div>
+                </div>
             </div>
         </div>
     </div>
