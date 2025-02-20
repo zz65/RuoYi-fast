@@ -14,20 +14,6 @@
     <th:block th:include="include :: header('首页')" />
     <link th:href="@{/css/custom.css}" rel="stylesheet"/>
     <style>
-        /* 设置卡片列宽 */
-        .has-card-view tr{
-            width: calc(100% / 6);
-            float: left;
-            padding: 0 15px;
-            box-sizing: border-box;
-        }
-
-        /* 清除浮动 */
-        .has-card-view::after {
-            content: "";
-            display: table;
-            clear: both;
-        }
         /* 自定义卡片样式 */
         .card {
             background: #fff;
@@ -55,7 +41,7 @@
             font-family: "Microsoft Yahei", Verdana, Simsun, "Segoe UI Web Light", "Segoe UI Light", "Segoe UI Web Regular", "Segoe UI", "Segoe UI Symbol", "Helvetica Neue", Arial;
             font-weight: bold;
             font-size: 14px;
-            width: 80px;
+            width: 150px;
             text-align: left;
         }
         .flex-item-seperate {
@@ -76,34 +62,18 @@
                     </div>
                     <div class="col-sm-2">
                         <div class="">
-                            <h3>在线数：<span style="color: green;">1000000</span></h3>
+                            <h3>在线数：<span style="color: #1AB394;">1000000</span></h3>
                         </div>
                     </div>
                     <div class="col-sm-2">
                         <div class="">
-                            <h3>离线数：<span style="color: red;">1000000</span></h3>
+                            <h3>离线数：<span style="color: #ED5565;">1000000</span></h3>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="col-sm-12 select-table table-striped">
-                <!--默认分页效果-->
-                <!--  <ul class="pagination">
-                      <li class="page-item"><a class="page-link" href="#">首页</a></li>
-                      <li class="page-item">
-                          <a class="page-link" href="#"><span>&laquo;</span></a>
-                      </li>
-                      <li class="page-item"><a class="page-link" href="#">1</a></li>
-                      <li class="page-item"><a class="page-link" href="#">2</a></li>
-                      <li class="page-item"><a class="page-link" href="#">3</a></li>
-                      <li class="page-item"><a class="page-link" href="#">4</a></li>
-                      <li class="page-item"><a class="page-link" href="#">5</a></li>
-                      <li class="page-item">
-                          <a class="page-link" href="#"><span >&raquo;</span></a>
-                      </li>
-                      <li class="page-item"><a class="page-link" href="#">尾页</a></li>
-                  </ul>-->
                 <!-- 卡片容器 -->
                 <div id="card-container" class="row"></div>
 
@@ -113,21 +83,6 @@
     <th:block th:include="include :: footer" />
     <script th:inline="javascript">
         $(function() {
-            var data = [];
-            for (let i = 0; i < 50; i++) {
-                var n = i + ''
-                var onlineState = 'ONLINE'
-                if (i % 2 === 0) {
-                    n = '1111111111111111111'
-                    onlineState = 'OFFLINE'
-                }
-                data.push({
-                    code: '设备编号' + n,
-                    name: '设备名称 ' + n,
-                    onlineState: onlineState,
-                })
-            }
-
             // 渲染卡片
             function renderCards(data) {
                 const container = $('#card-container').empty();
@@ -153,24 +108,50 @@
                                     <div class="flex-item-key"><span>焊工工号：</span></div>
                                 </div>
                                 <div class="flex-item">
-                                    <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.code}"><span>${item.code}</span></div>
-                                    <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.name}"><span>${item.name}</span></div>
+                                    <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.code != null ? item.code : ''}"><span>${item.code != null ? item.code : ''}</span></div>
+                                    <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.name != null ? item.name : ''}"><span>${item.name != null ? item.name : ''}</span></div>
                                     <div class="flex-item-seperate"><span></span></div>
-                                    <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.code}"><span>${item.code}</span></div>
-                                    <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.name}"><span>${item.name}</span></div>
+                                    <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.voltage != null ? item.voltage : ''}"><span>${item.voltage != null ? item.voltage : ''}</span></div>
+                                    <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.current != null ? item.current : ''}"><span>${item.current != null ? item.current : ''}</span></div>
                                     <div class="flex-item-seperate"><span></span></div>
-                                    <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.code}"><span>${item.code}</span></div>
-                                    <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.name}"><span>${item.name}</span></div>
+                                    <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.operator != null ? item.operator : ''}"><span>${item.operator != null ? item.operator : ''}</span></div>
+                                    <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.operatorNo != null ? item.operatorNo : ''}"><span>${item.operatorNo != null ? item.operatorNo : ''}</span></div>
                                 </div>
                             `);
                     col.append(card);
                     container.append(col);
                 });
+                // 设置鼠标悬停展示全部内容
+                $('[data-toggle="tooltip"]').tooltip();
             }
 
-            renderCards(data);
-            // 设置鼠标悬停展示全部内容
-            $('[data-toggle="tooltip"]').tooltip();
+            //测试数据 fixme
+            // var data = [];
+            // for (let i = 0; i < 50; i++) {
+            //     var n = i + ''
+            //     var onlineState = 'ONLINE'
+            //     if (i % 2 === 0) {
+            //         n = '1111111111111111111'
+            //         onlineState = 'OFFLINE'
+            //     }
+            //     data.push({
+            //         code: '设备编号' + n,
+            //         name: '设备名称 ' + n,
+            //         onlineState: onlineState,
+            //     })
+            // }
+            //
+            // renderCards(data);
+
+            $.operate.post('/homePage/statisticsOnlineStatus', {}, function(res) {
+                console.log(res);
+            })
+
+            $.operate.post('/homePage/realTimeDataList', {pageNum:1, pageSize:10000}, function(res) {
+                console.log(res);
+                renderCards(res.rows);
+            })
+
         });
     </script>
 </body>
