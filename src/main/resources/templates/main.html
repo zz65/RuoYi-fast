@@ -45,12 +45,21 @@
             /*flex: 1;*/
         }
         .flex-item-key {
-            width: 50px;
+            font-family: "Microsoft Yahei", Verdana, Simsun, "Segoe UI Web Light", "Segoe UI Light", "Segoe UI Web Regular", "Segoe UI", "Segoe UI Symbol", "Helvetica Neue", Arial;
+            font-weight: bold;
+            font-size: 14px;
+            width: 80px;
             text-align: right;
         }
         .flex-item-value {
+            font-family: "Microsoft Yahei", Verdana, Simsun, "Segoe UI Web Light", "Segoe UI Light", "Segoe UI Web Regular", "Segoe UI", "Segoe UI Symbol", "Helvetica Neue", Arial;
+            font-weight: bold;
+            font-size: 14px;
             width: 80px;
             text-align: left;
+        }
+        .flex-item-seperate {
+            height: 20px;
         }
     </style>
 </head>
@@ -98,78 +107,52 @@
                 <!-- 卡片容器 -->
                 <div id="card-container" class="row"></div>
 
-                <!-- 卡片列表 -->
-                <!--            <table
-                                    id="table"
-                                    data-toggle="table"
-                                    data-height=""
-                                    data-card-view="true"
-                            >
-                                <thead>
-                                <tr>
-                                    <th data-field="id">ID</th>
-                                    <th data-field="name">Item Name</th>
-                                    <th data-field="price">Item Price</th>
-                                </tr>
-                                </thead>
-                            </table>-->
-
-                <!--           <div id="card-list">
-                               &lt;!&ndash; 卡片 1 &ndash;&gt;
-                               <div class="panel panel-default">
-                                   <div class="panel-heading">
-                                       <h3 class="panel-title">Card 1 Title</h3>
-                                   </div>
-                                   <div class="panel-body">
-                                       Card 1 content goes here.
-                                   </div>
-                               </div>
-                           </div>-->
             </div>
         </div>
     </div>
     <th:block th:include="include :: footer" />
-    <!--<script th:src="@{/js/jquery.min.js}"></script>
-    <script th:src="@{/js/bootstrap.min.js}"></script>
-    <script th:src="@{/ajax/libs/layer/layer.min.js}"></script>-->
     <script th:inline="javascript">
         $(function() {
             var data = [];
             for (let i = 0; i < 50; i++) {
-                if (i % 2 === 0) {
+                for (let i = 0; i < 50; i++) {
+                    var n = i + ''
+                    if (i % 2 === 0) {
+                        n = '1111111111111111111'
+                    }
                     data.push({
-                        id: i,
-                        name: 'Item ' + i,
-                        price: '$' + i
-                    })
-                } else {
-                    data.push({
-                        id: i,
-                        name: 'Item ' + 1111111111,
-                        price: '$' + i
+                        code: '设备编号' + n,
+                        name: '设备名称 ' + n,
                     })
                 }
-                // data.push({
-                //     id: i,
-                //     name: 'Item ' + i,
-                //     price: '$' + i
-                // })
             }
 
             // 渲染卡片
             function renderCards(data) {
                 const container = $('#card-container').empty();
                 data.forEach(item => {
-                    const col = $('<div>').addClass('col-xs-6 col-sm-4 col-md-2');
+                    const col = $('<div>').addClass('col-xs-12 col-sm-6 col-md-3');
                     const card = $('<div>').addClass('card').addClass("flex-row");
                     card.append(`
                                 <div class="flex-item">
-                                    <div class="flex-item-key">名称：</div>
-                                    <div class="flex-item-key">价格：</div>
+                                    <div class="flex-item-key"><span>设备编号：</span></div>
+                                    <div class="flex-item-key"><span>设备名称：</span></div>
+                                    <div class="flex-item-seperate"><span></span></div>
+                                    <div class="flex-item-key"><span>焊接电压：</span></div>
+                                    <div class="flex-item-key"><span>焊接电流：</span></div>
+                                    <div class="flex-item-seperate"><span></span></div>
+                                    <div class="flex-item-key"><span>焊工姓名：</span></div>
+                                    <div class="flex-item-key"><span>焊工工号：</span></div>
                                 </div>
                                 <div class="flex-item">
-                                    <div class="flex-item-value ellipsis" data-toggle="tooltip">${item.name}</div>
-                                    <div class="flex-item-value ellipsis" data-toggle="tooltip">${item.price}</div>
+                                    <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.code}"><span>${item.code}</span></div>
+                                    <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.name}"><span>${item.name}</span></div>
+                                    <div class="flex-item-seperate"><span></span></div>
+                                    <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.code}"><span>${item.code}</span></div>
+                                    <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.name}"><span>${item.name}</span></div>
+                                    <div class="flex-item-seperate"><span></span></div>
+                                    <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.code}"><span>${item.code}</span></div>
+                                    <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.name}"><span>${item.name}</span></div>
                                 </div>
                             `);
                     col.append(card);
@@ -179,10 +162,7 @@
 
             renderCards(data);
             // 设置鼠标悬停展示全部内容
-            // $('[data-toggle="tooltip"]').tooltip();
-            $('.flex-item-value').tooltip();
-
-            /*$('#table').bootstrapTable('load', data);*/
+            $('[data-toggle="tooltip"]').tooltip();
         });
     </script>
 </body>
