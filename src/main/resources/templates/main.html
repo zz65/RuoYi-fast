@@ -116,12 +116,15 @@
             var data = [];
             for (let i = 0; i < 50; i++) {
                 var n = i + ''
+                var onlineState = 'ONLINE'
                 if (i % 2 === 0) {
                     n = '1111111111111111111'
+                    onlineState = 'OFFLINE'
                 }
                 data.push({
                     code: '设备编号' + n,
                     name: '设备名称 ' + n,
+                    onlineState: onlineState,
                 })
             }
 
@@ -131,9 +134,24 @@
                 data.forEach(item => {
                     const col = $('<div>').addClass('col-xs-12 col-sm-6 col-md-3');
                     const card = $('<div>').addClass('card').addClass("flex-row");
+
+
+/*                    const flexItemFirst = $('<div>').addClass("flex-item");
+                    var isOnline = item && item.onlineState === 'ONLINE';
+                    if (isOnline) {
+                        flexItemFirst.append(`
+                        <div class="device-online"><img alt="[ 设备 ]" src="../static/device-online.png" th:src="@{/device-online.png}"></div>
+                    `);
+                    } else {
+                        flexItemFirst.append(`
+                        <div class="device-online"><img alt="[ 设备 ]" src="../static/device-offline.png" th:src="@{/device-offline.png}"></div>
+                    `);
+                    }
+                    card.append(flexItemFirst);*/
+
                     card.append(`
                                 <div class="flex-item">
-                                    <img alt="[ 设备 ]" src="../static/device-online.png" th:src="@{/device-online.png}">
+                                    <img alt="[ 设备 ]" src="/device-online.png" th:src="@{/device-online.png}">
                                 </div>
                                 <div class="flex-item">
                                     <div class="flex-item-key"><span>设备编号：</span></div>
