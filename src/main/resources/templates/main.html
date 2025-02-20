@@ -136,22 +136,11 @@
                     const card = $('<div>').addClass('card').addClass("flex-row");
 
 
-/*                    const flexItemFirst = $('<div>').addClass("flex-item");
-                    var isOnline = item && item.onlineState === 'ONLINE';
-                    if (isOnline) {
-                        flexItemFirst.append(`
-                        <div class="device-online"><img alt="[ 设备 ]" src="../static/device-online.png" th:src="@{/device-online.png}"></div>
-                    `);
-                    } else {
-                        flexItemFirst.append(`
-                        <div class="device-online"><img alt="[ 设备 ]" src="../static/device-offline.png" th:src="@{/device-offline.png}"></div>
-                    `);
-                    }
-                    card.append(flexItemFirst);*/
-
+                    //获取设备的在线状态
+                    let imageName =  item && item.onlineState === 'ONLINE' ? 'device-online.png' : 'device-offline.png';
                     card.append(`
                                 <div class="flex-item">
-                                    <img alt="[ 设备 ]" src="/device-online.png" th:src="@{/device-online.png}">
+                                    <img alt="[ 设备 ]" src="/${imageName}" th:src="@{/${imageName}">
                                 </div>
                                 <div class="flex-item">
                                     <div class="flex-item-key"><span>设备编号：</span></div>
