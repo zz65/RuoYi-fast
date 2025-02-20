@@ -80,11 +80,14 @@
 					checkbox: true
 				},
 					{
+						field: 'id',
+						visible: false
+					},
+					{
+						field: 'onlineState',
 						title: '在线状态',
 						align: 'center',
-						formatter: function (value, row, index) {
-							return onlineStatusTools(row);
-						},
+						formatter: onlineStatusFormatter,
 						width: 80
 					},
 					{
@@ -208,10 +211,10 @@
 		}
 
 		/* 设备在线状态显示 */
-		function onlineStatusTools(row) {
-			if (row.onlineState == 'ONLINE') {
+		function onlineStatusFormatter(val, rowData, index) {
+			if (rowData.onlineState == 'ONLINE') {
 				return '<span class="badge badge-primary">在线</span>';
-			} else if (row.onlineState == 'OFFLINE') {
+			} else if (rowData.onlineState == 'OFFLINE') {
 				return '<span class="badge badge-danger">离线</span>';
 			} else {
 				return '<span class="badge badge-danger">离线</span>';
