@@ -115,16 +115,14 @@
         $(function() {
             var data = [];
             for (let i = 0; i < 50; i++) {
-                for (let i = 0; i < 50; i++) {
-                    var n = i + ''
-                    if (i % 2 === 0) {
-                        n = '1111111111111111111'
-                    }
-                    data.push({
-                        code: '设备编号' + n,
-                        name: '设备名称 ' + n,
-                    })
+                var n = i + ''
+                if (i % 2 === 0) {
+                    n = '1111111111111111111'
                 }
+                data.push({
+                    code: '设备编号' + n,
+                    name: '设备名称 ' + n,
+                })
             }
 
             // 渲染卡片
@@ -134,6 +132,9 @@
                     const col = $('<div>').addClass('col-xs-12 col-sm-6 col-md-3');
                     const card = $('<div>').addClass('card').addClass("flex-row");
                     card.append(`
+                                <div class="flex-item">
+                                    <img alt="[ 设备 ]" src="../static/device-online.png" th:src="@{/device-online.png}">
+                                </div>
                                 <div class="flex-item">
                                     <div class="flex-item-key"><span>设备编号：</span></div>
                                     <div class="flex-item-key"><span>设备名称：</span></div>
