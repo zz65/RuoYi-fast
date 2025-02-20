@@ -57,17 +57,17 @@
                 <div class="row">
                     <div class="col-sm-2">
                         <div class="">
-                            <h3>设备总数：<span style="color: blue;">1000000</span></h3>
+                            <h3>设备总数：<span id="total" style="color: blue;"></span></h3>
                         </div>
                     </div>
                     <div class="col-sm-2">
                         <div class="">
-                            <h3>在线数：<span style="color: #1AB394;">1000000</span></h3>
+                            <h3>在线数：<span id="onlineCount" style="color: #1AB394;"></span></h3>
                         </div>
                     </div>
                     <div class="col-sm-2">
                         <div class="">
-                            <h3>离线数：<span style="color: #ED5565;">1000000</span></h3>
+                            <h3>离线数：<span id="offlineCount" style="color: #ED5565;"></span></h3>
                         </div>
                     </div>
                 </div>
@@ -145,6 +145,9 @@
 
             $.operate.post('/homePage/statisticsOnlineStatus', {}, function(res) {
                 console.log(res);
+                $('#total').text(res.total);
+                $('#onlineCount').text(res.onlineCount);
+                $('#offlineCount').text(res.offlineCount);
             })
 
             $.operate.post('/homePage/realTimeDataList', {pageNum:1, pageSize:10000}, function(res) {
