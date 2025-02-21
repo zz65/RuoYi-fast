@@ -3,6 +3,7 @@ version: '3.8'
 services:
   kafka1:
     image: registry.cn-hangzhou.aliyuncs.com/examine_1/confluentinc_cp-kafka:7.7.1
+    restart: always
     container_name: kafka1
     networks:
       kafka-net:

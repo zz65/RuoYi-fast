@@ -20,6 +20,7 @@ services:
   doris-fe-01:
 #    image: "apache/doris:doris-fe-2.1.7"
     image: "registry.cn-hangzhou.aliyuncs.com/examine_1/apache-doris:doris-fe-2.1.7"
+    restart: always
     container_name: "doris-fe-01"
     hostname: "fe-01"
     environment:
@@ -44,6 +45,7 @@ services:
   doris-be-01:
 #    image: "apache/doris:doris-be-2.1.7"
     image: "registry.cn-hangzhou.aliyuncs.com/examine_1/apache-doris:doris-be-2.1.7"
+    restart: always
     container_name: "doris-be-01"
     hostname: "be-01"
     depends_on:
