@@ -481,10 +481,10 @@ sudo docker exec -it kafka1 kafka-server-start --version
 --创建主题
 sudo docker exec -it kafka1 kafka-topics --create --topic console-test-topic --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 3
 sudo docker exec -it kafka2 kafka-topics --create --topic console-test-topic --bootstrap-server kafka3:9092
---数据网关写入主题
+--数据上报主题
 sudo docker exec -it kafka1 kafka-topics --create --topic data-report --bootstrap-server kafka1:9092 --partitions 1 --replication-factor 1
 sudo docker exec -it kafka1 kafka-topics --create --topic data-report --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 3
---数据网关写入主题-测试主题
+--数据上报主题-测试主题
 sudo docker exec -it kafka1 kafka-topics --create --topic data-report-test --bootstrap-server kafka1:9092 --partitions 1 --replication-factor 1
 sudo docker exec -it kafka1 kafka-topics --create --topic data-report-test --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 3
 
@@ -492,7 +492,7 @@ sudo docker exec -it kafka1 kafka-topics --create --topic data-report-test --boo
 --删除主题
 sudo docker exec -it kafka1 kafka-topics --delete --topic console-test-topic --bootstrap-server kafka2:9092
 sudo docker exec -it kafka1 kafka-topics --delete --topic data-report-test --bootstrap-server kafka2:9092
-sudo docker exec -it kafka1 kafka-topics --delete --topic data-report --bootstrap-server kafka2:9092
+sudo docker exec -it kafka1 kafka-topics --delete --topic data-report --bootstrap-server kafka1:9092
 
 --查所有主题
 sudo docker exec -it kafka1 kafka-topics --list --bootstrap-server kafka1:9092
@@ -513,6 +513,7 @@ sudo docker exec -it kafka1 kafka-consumer-groups --describe --group admin --boo
 sudo docker exec -it kafka1 kafka-consumer-groups --describe --group admin --bootstrap-server kafka1:9092
 --通过kafka-console-consume消费消息，并且不指定消费者组-consumer-property group.id。偏移量改变不会会持久化，相当于只查看不消费。
 sudo docker exec -it kafka1 kafka-console-consumer --topic console-test-topic1 --from-beginning --bootstrap-server kafka2:9092
+sudo docker exec -it kafka1 kafka-console-consumer --topic  data-report --from-beginning --bootstrap-server kafka1:9092
 --通过kafka-console-consume消费消息，并且指定消费者组-consumer-property group.id。偏移量改变会持久化。
 sudo docker exec -it kafka1 kafka-console-consumer --topic data-report --consumer-property group.id=console1 --from-beginning --bootstrap-server kafka2:9092
 --这里--from-beginning表示从offset=0开始消费，--max-messages 10表示每次最多消费10条

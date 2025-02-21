@@ -47,7 +47,7 @@ public class TestMakeMqttData {
         int globalMonth = 2;
         int globalDay = 21;
         int globalHour = 0;
-        int globalMinute = 0;
+        int globalMinute = 1;
         int globalEndHour = 0;
         int globalEndMinute = 1;
         int[] globalArr = new int[] {globalYear, globalMonth, globalDay, globalHour, globalMinute};
@@ -72,7 +72,7 @@ public class TestMakeMqttData {
                     int day;
                     while ((day = dateTime.getDayOfMonth()) == paramDay && (hour = dateTime.getHour()) <= globalEndHour && (minute = dateTime.getMinute()) <= globalEndMinute) {
                         log.info("dateTime:{}", dateTime);
-                        for (int i = 0; i < 5; i++) {
+                        for (int i = 0; i < 1; i++) {
                             DataReportMsg dataReportMsg = new DataReportMsg();
                             dataReportMsg.setDeviceId("device-" + i);
                             dataReportMsg.setTimestamp(System.currentTimeMillis() / 1000);

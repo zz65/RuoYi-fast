@@ -30,8 +30,7 @@ public class DataReportKafkaListener {
      * @param acknowledgment
      */
     @KafkaListener(
-            // topics = "${spring.kafka.custom.topic.data-report}"
-            topics = "data-report"
+            topics = "${spring.kafka.custom.topic.data-report}"
             ,groupId = "${spring.kafka.consumer.group-id}"
             ,clientIdPrefix = "${spring.kafka.consumer.client-id}" + "_${server.port}" //每个使用@KafkaListener注解的消费者都会有一个独特的客户端ID，格式为<clientIdPrefix>-<thread-id>
             ,containerFactory = "defaultContainerFactory"
