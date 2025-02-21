@@ -24,19 +24,31 @@ public class Log {
     }
 
     public static void i(String msg) {
+        i(msg, false);
+    }
+
+    public static void i(String msg, boolean isPing) {
+        if (msg == null) {
+            return;
+        }
         if (!isEnable)
             return;
 
-        if (!isEnablePing && msg.contains("[ping]"))
+        if (!isEnablePing && isPing)
             return;
 
-        // System.out.println(f.format(new Date()) + " " + getPid() + "-" + Thread.currentThread().getId() + " I/" +
-        //         format(msg, 3));
         StringBuilder builder = new StringBuilder();
         String logMessage = builder.append(f.format(new Date())).append(" ").append(getPid()).append("-").append(Thread.currentThread().getId()).append(" I/").append(
                 format(msg, 3)).toString();
-        if (log.isInfoEnabled()) {
-            log.info(logMessage);
+
+        if (isPing) {
+            if (log.isDebugEnabled()) {
+                log.debug(logMessage);
+            }
+        } else {
+            if (log.isInfoEnabled()) {
+                log.info(logMessage);
+            }
         }
     }
 

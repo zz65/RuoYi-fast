@@ -114,6 +114,11 @@ public class MqttConfig {
     private boolean cleanSession = false;
 
     /**
+     * 允许打印ping
+     */
+    private boolean enableLogPing = false;
+
+    /**
      * 订阅主题
      */
     private String topic = "inhand/#";

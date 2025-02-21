@@ -55,7 +55,7 @@ public class PingProcessor extends AsyncTask<String> {
 
     public void ping(Channel channel) throws Exception {
         MqttMessage msg = ProtocolUtils.pingReqMessage();
-        Log.i("[ping]-->发起ping：" + msg);
+        Log.i("[ping]-->发起ping：" + msg, true);
         channel.writeAndFlush(msg);
     }
 

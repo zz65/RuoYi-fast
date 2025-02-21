@@ -87,6 +87,8 @@ mqtt:
     connection-timeout: 10
     action-timeout: 10
     clean-session: true
+    #允许打印ping
+    enable-log-ping: true
     thread-pool:
         core-pool-size: 1
         max-pool-size: 2

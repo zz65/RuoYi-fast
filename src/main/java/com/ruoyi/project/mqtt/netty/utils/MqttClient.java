@@ -169,6 +169,7 @@ public class MqttClient {
         this.connectOptions = options;
         this.connectTimeout = timeout;
 
+        Log.enablePing(options.isEnableLogPing());
         try {
             doConnect(options, timeout);
             onConnected();
@@ -624,7 +625,7 @@ public class MqttClient {
             MqttMessage msg = (MqttMessage) msgx;
             MqttFixedHeader mqttFixedHeader = msg.fixedHeader();
             if (mqttFixedHeader.messageType() == MqttMessageType.PINGRESP) {
-                Log.i("[ping]-->channelRead0 : " + msgx);
+                Log.i("[ping]-->channelRead0 : " + msgx, true);
             } else {
                 Log.i("-->channelRead0 : " + msgx);
             }

@@ -41,7 +41,6 @@ public class MqttClientStarter {
 
     @PostConstruct
     public void start() throws Exception {
-        Log.enablePing(true);
         mqttClient = new MqttClient();
         //单位转化，毫秒转秒
         long actionTimeout = Long.valueOf(options.getActionTimeout()) * 1000;
