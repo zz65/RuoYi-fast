@@ -79,6 +79,11 @@ public class DataReportMsg implements Serializable {
         private Long timestamp;
 
         /**
+         * 通用唯一码
+         */
+        private String uuid;
+
+        /**
          * 是否开机 true开机 false关机
          */
         private Boolean isOn;
