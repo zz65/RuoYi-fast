@@ -50,26 +50,5 @@ public final class GlobalDeviceRealTimeCache {
         return deviceVo;
     }
 
-    /**
-     * 更新设备开机时间
-     * @param sn
-     * @param turnOnTime
-     * @return
-     */
-    public static DeviceVo updateTurnOnTime(String sn, LocalDateTime turnOnTime) {
-        DeviceVo deviceVo = realTimeMap.get(sn);
-        if (deviceVo == null) {
-            return null;
-        }
-        if (turnOnTime != null) {
-            deviceVo.setTurnOnTime(turnOnTime);
-            if (deviceVo.getTurnOffTime() != null && turnOnTime.isAfter(deviceVo.getTurnOffTime())) {
-                deviceVo.setTurnOffTime(null);
-                deviceVo.setOperator(null);
-                deviceVo.setOperatorNo(null);
-            }
-        }
-        return deviceVo;
-    }
 
 }

@@ -1,9 +1,9 @@
 package com.ruoyi.project.mqtt.bean;
 
 import lombok.Data;
-import lombok.Getter;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * 上报数据的格式
@@ -27,7 +27,7 @@ public class DataReportMsg implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 设备唯一标识,如sn
+     * 设备唯一标识,如sn。注意这里的deviceId是设备端传上来的，不是iot_device表的id
      */
     private String deviceId;
 
@@ -44,10 +44,13 @@ public class DataReportMsg implements Serializable {
     /**
      * 上报的具体数据
      */
-    private ReportData data;
+    private Map data;
 
+    /**
+     * 上传实时数据的参数结构
+     */
     @Data
-    public static class ReportData  {
+    public static class RealTimeData  {
         /**
          * 采集数据时的时间戳（秒）
          */
@@ -62,5 +65,32 @@ public class DataReportMsg implements Serializable {
          * 焊接电流
          */
         private Double current;
+    }
+
+
+    /**
+     * 上传开关机信号的参数结构
+     */
+    @Data
+    public static class TurnOnOrOffData {
+        /**
+         * 采集数据时的时间戳（秒）
+         */
+        private Long timestamp;
+
+        /**
+         * 是否开机 true开机 false关机
+         */
+        private Boolean isOn;
+
+        /**
+         * 焊工姓名
+         */
+        private String operator;
+
+        /**
+         * 焊工工号
+         */
+        private String operatorNo;
     }
 }
