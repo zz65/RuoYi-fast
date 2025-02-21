@@ -114,7 +114,10 @@
 
 
                     //获取设备的在线状态
-                    let imageName =  item && item.onlineState === 'ONLINE' ? 'device-online.png' : 'device-offline.png';
+                    let isOnline = item && item.onlineState === 'ONLINE';
+                    let imageName =  isOnline ? 'device-online.png' : 'device-offline.png';
+                    let onlineStateDesc =  isOnline ? '在线' : '离线';
+                    let onlineStateClass =  isOnline ? 'badge badge-primary' : 'badge badge-danger';
                     card.append(`
                                 <div class="flex-item">
                                     <img alt="[ 设备 ]" src="/${imageName}" th:src="@{/${imageName}">
@@ -122,6 +125,7 @@
                                 <div class="flex-item">
                                     <div class="flex-item-key"><span>设备编号：</span></div>
                                     <div class="flex-item-key"><span>设备名称：</span></div>
+                                    <div class="flex-item-key"><span>在线状态：</span></div>
                                     <div class="flex-item-seperate"><span></span></div>
                                     <div class="flex-item-key"><span>焊接电压：</span></div>
                                     <div class="flex-item-key"><span>焊接电流：</span></div>
@@ -132,6 +136,7 @@
                                 <div class="flex-item">
                                     <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.code != null ? item.code : ''}"><span>${item.code != null ? item.code : ''}</span></div>
                                     <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.name != null ? item.name : ''}"><span>${item.name != null ? item.name : ''}</span></div>
+                                    <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${onlineStateDesc}"><span class="${onlineStateClass}">${onlineStateDesc}</span></div>
                                     <div class="flex-item-seperate"><span></span></div>
                                     <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.voltage != null ? item.voltage : ''}"><span>${item.voltage != null ? item.voltage : ''}</span></div>
                                     <div class="flex-item-value ellipsis" data-toggle="tooltip" title="${item.current != null ? item.current : ''}"><span>${item.current != null ? item.current : ''}</span></div>
