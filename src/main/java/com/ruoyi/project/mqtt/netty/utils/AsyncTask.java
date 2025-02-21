@@ -25,41 +25,45 @@ import java.util.concurrent.TimeoutException;
  */
 // @RequiredArgsConstructor
 public abstract class AsyncTask<T> implements RunnableFuture<T>, Callable<T> {
-    private MqttThreadPoolConfig mqttThreadPoolConfig;
+    // private MqttThreadPoolConfig mqttThreadPoolConfig;
+    // private volatile Executor sDefaultExecutor = null;
 
-    // private volatile Executor sDefaultExecutor = new ThreadPoolExecutor(
-    //         /* corePoolSize, maximumPoolSize, keepAliveTime,*/
-    //         4, 4, 120,
-    //         TimeUnit.SECONDS,
-    //         // new LinkedBlockingQueue<>(capacity),
-    //         new LinkedBlockingQueue<>(20000),
-    //         //线程名前缀
-    //         new CustomizableThreadFactory("AsyncTask-"),
-    //         new ThreadPoolExecutor.CallerRunsPolicy()
-    // );
-    private volatile Executor sDefaultExecutor = null;
+    private MqttThreadPoolConfig mqttThreadPoolConfig = new MqttThreadPoolConfig();
+    int corePoolSize = mqttThreadPoolConfig.getCorePoolSize();
+    int maxPoolSize = mqttThreadPoolConfig.getMaxPoolSize();
+    int queueCapacity = mqttThreadPoolConfig.getQueueCapacity();
+    int keepAliveSeconds = mqttThreadPoolConfig.getKeepAliveSeconds();
+    String threadNamePrefix = mqttThreadPoolConfig.getThreadNamePrefix();
+    private volatile Executor sDefaultExecutor = new ThreadPoolExecutor(
+            corePoolSize, maxPoolSize, keepAliveSeconds,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(queueCapacity),
+            //线程名前缀
+            new CustomizableThreadFactory(threadNamePrefix),
+            new ThreadPoolExecutor.DiscardOldestPolicy()); // 丢弃最老的任务
+
 
     private FutureTask<T> futureTask;
 
     public AsyncTask() {
-        if (mqttThreadPoolConfig == null) {
-            mqttThreadPoolConfig = SpringUtils.getBean(MqttThreadPoolConfig.class);
-        }
-        int corePoolSize = mqttThreadPoolConfig.getCorePoolSize();
-        int maxPoolSize = mqttThreadPoolConfig.getMaxPoolSize();
-        int queueCapacity = mqttThreadPoolConfig.getQueueCapacity();
-        int keepAliveSeconds = mqttThreadPoolConfig.getKeepAliveSeconds();
-        String threadNamePrefix = mqttThreadPoolConfig.getThreadNamePrefix();
-
-        if (sDefaultExecutor == null) {
-            sDefaultExecutor = new ThreadPoolExecutor(
-                    corePoolSize, maxPoolSize, keepAliveSeconds,
-                    TimeUnit.SECONDS,
-                    new LinkedBlockingQueue<>(queueCapacity),
-                    //线程名前缀
-                    new CustomizableThreadFactory(threadNamePrefix),
-                    new ThreadPoolExecutor.DiscardOldestPolicy()); // 丢弃最老的任务
-        }
+        // if (mqttThreadPoolConfig == null) {
+        //     mqttThreadPoolConfig = SpringUtils.getBean(MqttThreadPoolConfig.class);
+        // }
+        // int corePoolSize = mqttThreadPoolConfig.getCorePoolSize();
+        // int maxPoolSize = mqttThreadPoolConfig.getMaxPoolSize();
+        // int queueCapacity = mqttThreadPoolConfig.getQueueCapacity();
+        // int keepAliveSeconds = mqttThreadPoolConfig.getKeepAliveSeconds();
+        // String threadNamePrefix = mqttThreadPoolConfig.getThreadNamePrefix();
+        //
+        // if (sDefaultExecutor == null) {
+        //     sDefaultExecutor = new ThreadPoolExecutor(
+        //             corePoolSize, maxPoolSize, keepAliveSeconds,
+        //             TimeUnit.SECONDS,
+        //             new LinkedBlockingQueue<>(queueCapacity),
+        //             //线程名前缀
+        //             new CustomizableThreadFactory(threadNamePrefix),
+        //             new ThreadPoolExecutor.DiscardOldestPolicy()); // 丢弃最老的任务
+        // }
 
         this.futureTask = new FutureTask<T>(this) {
             @Override

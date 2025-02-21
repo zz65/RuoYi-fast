@@ -1,8 +1,10 @@
 package com.ruoyi.project.mqtt.netty.starter;
 
 import com.ruoyi.common.utils.StringUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
@@ -22,16 +24,20 @@ import javax.annotation.Resource;
  * @date 2024/1/5 10:55
  * @description: 类描述
  */
+@RequiredArgsConstructor
 @Component
 @Slf4j
 public class MqttClientStarter {
     @Resource
-    private MqttConfig options;
+    private final MqttConfig options;
 
-    @Resource
-    KafkaTemplate kafkaTemplate;
+    private final KafkaTemplate kafkaTemplate;
 
     private MqttClient mqttClient = null;
+
+    @Value("${spring.kafka.custom.topic.data-report}")
+    private String kafkaDataReportTopic;
+
 
     @PostConstruct
     public void start() throws Exception {
@@ -92,32 +98,33 @@ public class MqttClientStarter {
                 if (topic == null) {
                     return;
                 }
-                if (topic.startsWith(MqttTopicConstant.INHAND)) {
+                if (topic.startsWith(options.getTopic())) {
                     String origin = content;
                     String decodeStr = StringUtils.asciiToNative(origin);
                     if (log.isDebugEnabled()) {
                         if (origin.equals(decodeStr)) {
-                            log.debug("listenInhand receive topic:{}, origin message: {}", topic, origin);
+                            log.debug("mqtt receive topic:{}, origin message: {}", topic, origin);
                         } else {
-                            log.debug("listenInhand receive topic:{}, decoded message: {}", topic, decodeStr);
+                            log.debug("mqtt receive topic:{}, decoded message: {}", topic, decodeStr);
                         }
                     }
 
                     //写入kafka
-                    String sn = StringUtils.isNotBlank(topic) ? topic.replace(MqttTopicConstant.INHAND, "").replace("examine/", "") : "";
-                    String kafkaMessage = StringUtils.append(decodeStr, "###", sn);
-                    kafkaTemplate.send(KafkaTopicConstant.INHAND, kafkaMessage)
+                    // String sn = StringUtils.isNotBlank(topic) ? topic.replace(MqttTopicConstant.INHAND, "").replace("examine/", "") : "";
+                    // String kafkaMessage = StringUtils.append(decodeStr, "###", sn);
+                    String kafkaMessage = decodeStr;
+                    kafkaTemplate.send(kafkaDataReportTopic, kafkaMessage)
                         .addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
                             @Override
                             public void onSuccess(SendResult<String, String> result) {
                                 if (log.isDebugEnabled()) {
                                     RecordMetadata recordMetadata = result.getRecordMetadata();
-                                    log.debug("sendInhandMessage success：{}-{}-{}", recordMetadata.topic(),
+                                    log.debug("sendKafkaMessage success：{}-{}-{}", recordMetadata.topic(),
                                             recordMetadata.partition(), recordMetadata.offset());
                                 }
                             }
                             public void onFailure(Throwable ex) {
-                                log.error("sendInhandMessage error：", ex);
+                                log.error("sendKafkaMessage error：", ex);
                             }
                         });
                 }

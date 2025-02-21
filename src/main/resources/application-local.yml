@@ -81,7 +81,8 @@ mqtt:
     client-id: examine-mqtt-netty
     #  inbound-topic: emqx/+/test,emqx/+/test_reply,emqx/young/+
     inbound-topic: emqx/+/test
-    topic: inhand/examine/# #为了和其他使用mqtt服务器的人隔离，测试主题使用inhand/examine/#；生产用inhand/#
+#    topic: data-report/test/#  #为了和其他使用mqtt服务器的人隔离，测试主题使用data-report/test//#；生产用data-report/#
+    topic: data-report
     keep-alive-interval: 60
     connection-timeout: 10
     action-timeout: 10
@@ -92,3 +93,52 @@ mqtt:
         queue-capacity: 20000
         keep-alive-seconds: 60
         thread-name-prefix: mqtt-thread-pool-
+
+
+#kafka配置
+spring.kafka:
+    bootstrap-servers: 192.168.0.100:9094
+    # 生产者
+    producer:
+        # key与value的序列化
+        key-serializer: org.apache.kafka.common.serialization.StringSerializer
+        value-serializer: org.apache.kafka.common.serialization.StringSerializer
+        retries: 1
+        # ack值说明
+        #      0：表示 producer 不需要等待 broker 的消息确认。这个选项时延最小但同时风险最大（因为当 server 宕机时，数据将会丢失）。
+        #      1：表示 producer 只需要获得 kafka 集群中的 leader 节点确认即可，这个选择时延较小同时确保了 leader 节点确认接收成功。
+        #      all(-1)：需要 ISR 中所有的 Replica 给予接收确认，速度最慢，安全性最高，但是由于 ISR 可能会缩小到仅包含一个 Replica，所以设置参数为 all 并不能一定避免数据丢失，
+        acks: 1
+        #发送频率。linger.ms和batch.size参数满足任一条件，就会发送
+        batch-size: 5120 #5kb
+        #压缩
+        compression-type: gzip
+        properties:
+            max.request.size: 1048576 #1M,默认值就是1m
+            #发送频率。linger.ms和batch.size参数满足任一条件，就会发送
+            linger.ms: 50 #50ms，默认值是0，表示只有batch.size满足要求才会发送
+            retry.backoff.ms: 2000  # 设置重试间隔时间（以毫秒为单位）
+            reconnect.backoff.ms: 3000  # 设置重试间隔时间（以毫秒为单位）
+        #用于服务器端日志记录，方便后续排查问题
+        client-id: producerAdmin
+    # 消费者
+    consumer:
+        # key与value的反序列化
+        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        #消费者组的id
+        group-id: admin
+        enable-auto-commit: false #如果如果需要精准控制，要关闭自动提交；
+        auto-offset-reset: latest #从提交的offset开始消费。取值：earliest，latest
+        # 一次调用poll（）返回的最大记录数，默认是500；
+        max-poll-records: 100
+        #用于服务器端日志记录，方便后续排查问题
+        client-id: consumerAdmin
+        group-instance-id: admin
+        # 消息轮询的最大间隔，如果消费者在这个时间间隔内不能消费完消息并再次调用poll，会被认为是死亡，从消费者中移除。并会触发再平衡（成员加入和离开都会再平衡rebalance），将要提交位移的分区分配给了另一个消费者实例。
+        #默认300000,5min
+        max-poll-interval-ms: 300000
+        # 是消费者配置中的一个重要参数，它定义了Kafka broker认为消费者仍然活跃的时间窗口。如果在这个时间窗口内，Kafka没有收到来自消费者的任何心跳，那么它会认为该消费者已经死亡，从消费者中移除，并会触发再平衡（rebalance），将该消费者负责的分区重新分配给其他存活的消费者。
+        session-timeout-ms: 600000
+    custom: #自定义数据
+        topic.data-report: data-report

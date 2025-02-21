@@ -248,6 +248,11 @@
             <artifactId>spring-kafka</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+        </dependency>
+
         <!-- netty实现mqtt客户端 -->
         <dependency>
             <groupId>io.netty</groupId>

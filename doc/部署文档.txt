@@ -482,20 +482,17 @@ sudo docker exec -it kafka1 kafka-server-start --version
 sudo docker exec -it kafka1 kafka-topics --create --topic console-test-topic --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 3
 sudo docker exec -it kafka2 kafka-topics --create --topic console-test-topic --bootstrap-server kafka3:9092
 --数据网关写入主题
-sudo docker exec -it kafka1 kafka-topics --create --topic vehicle_dispatcher --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 3
+sudo docker exec -it kafka1 kafka-topics --create --topic data-report --bootstrap-server kafka1:9092 --partitions 1 --replication-factor 1
+sudo docker exec -it kafka1 kafka-topics --create --topic data-report --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 3
 --数据网关写入主题-测试主题
-sudo docker exec -it kafka1 kafka-topics --create --topic testVehicleDispatcher --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 3
---flink抛出推演报警熵值计算事件的主题
-sudo docker exec -it kafka1 kafka-topics --create --topic vehicleAlarmAlgorithmCalculateEvent --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 3
---flink抛出推演报警熵值计算事件的主题-测试主题
-sudo docker exec -it kafka1 kafka-topics --create --topic testVehicleAlarmAlgorithmCalculateEvent --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 3
+sudo docker exec -it kafka1 kafka-topics --create --topic data-report-test --bootstrap-server kafka1:9092 --partitions 1 --replication-factor 1
+sudo docker exec -it kafka1 kafka-topics --create --topic data-report-test --bootstrap-server kafka1:9092 --partitions 3 --replication-factor 3
+
 
 --删除主题
 sudo docker exec -it kafka1 kafka-topics --delete --topic console-test-topic --bootstrap-server kafka2:9092
-sudo docker exec -it kafka1 kafka-topics --delete --topic testVehicleDispatcher --bootstrap-server kafka2:9092
-sudo docker exec -it kafka1 kafka-topics --delete --topic testVehicleAlarmAlgorithmCalculateEvent --bootstrap-server kafka2:9092
-sudo docker exec -it kafka1 kafka-topics --delete --topic vehicle_dispatcher --bootstrap-server kafka2:9092
-sudo docker exec -it kafka1 kafka-topics --delete --topic vehicleAlarmAlgorithmCalculateEvent --bootstrap-server kafka2:9092
+sudo docker exec -it kafka1 kafka-topics --delete --topic data-report-test --bootstrap-server kafka2:9092
+sudo docker exec -it kafka1 kafka-topics --delete --topic data-report --bootstrap-server kafka2:9092
 
 --查所有主题
 sudo docker exec -it kafka1 kafka-topics --list --bootstrap-server kafka1:9092
@@ -509,31 +506,33 @@ sudo docker exec -it kafka1 kafka-console-producer --topic console-test-topic1 -
 --============================消费消息 start ============================
 --查看所有消费者组
 sudo docker exec -it kafka1 kafka-consumer-groups --bootstrap-server kafka2:9092 --list
+sudo docker exec -it kafka1 kafka-consumer-groups --bootstrap-server kafka1:9092 --list
 --查看某个消费者组的消费偏移量
-sudo docker exec -it kafka1 kafka-consumer-groups --describe --group dataGateway --bootstrap-server kafka2:9092
 sudo docker exec -it kafka1 kafka-consumer-groups --describe --group console1 --bootstrap-server kafka2:9092
-sudo docker exec -it kafka1 kafka-consumer-groups --describe --group flinkRealtime --bootstrap-server kafka2:9092
 sudo docker exec -it kafka1 kafka-consumer-groups --describe --group admin --bootstrap-server kafka2:9092
+sudo docker exec -it kafka1 kafka-consumer-groups --describe --group admin --bootstrap-server kafka1:9092
 --通过kafka-console-consume消费消息，并且不指定消费者组-consumer-property group.id。偏移量改变不会会持久化，相当于只查看不消费。
 sudo docker exec -it kafka1 kafka-console-consumer --topic console-test-topic1 --from-beginning --bootstrap-server kafka2:9092
 --通过kafka-console-consume消费消息，并且指定消费者组-consumer-property group.id。偏移量改变会持久化。
-sudo docker exec -it kafka1 kafka-console-consumer --topic vehicle_dispatcher --consumer-property group.id=console1 --from-beginning --bootstrap-server kafka2:9092
+sudo docker exec -it kafka1 kafka-console-consumer --topic data-report --consumer-property group.id=console1 --from-beginning --bootstrap-server kafka2:9092
 --这里--from-beginning表示从offset=0开始消费，--max-messages 10表示每次最多消费10条
-sudo docker exec -it kafka1 kafka-console-consumer --topic vehicle_dispatcher --from-beginning --bootstrap-server kafka2:9092  --max-messages 10
+sudo docker exec -it kafka1 kafka-console-consumer --topic data-report --from-beginning --bootstrap-server kafka2:9092  --max-messages 10
 --这里--partition 0 --offset 100表示从分区0偏移量100开始消费
-sudo docker exec -it kafka1 kafka-console-consumer --topic vehicle_dispatcher --partition 0 --offset 100 --bootstrap-server kafka2:9092 --max-messages 10
-sudo docker exec -it kafka1 kafka-console-consumer --topic vehicle_dispatcher --partition 0 --offset 46000 --bootstrap-server kafka2:9092 --max-messages 500
+sudo docker exec -it kafka1 kafka-console-consumer --topic data-report --partition 0 --offset 100 --bootstrap-server kafka2:9092 --max-messages 10
+sudo docker exec -it kafka1 kafka-console-consumer --topic data-report --partition 0 --offset 46000 --bootstrap-server kafka2:9092 --max-messages 500
 --修改某个消费者组的消费偏移量。如果kafka消息堆积过多，而且消息又没那么重要或者是测试环境，可以用此命令
-sudo docker exec -it kafka1 kafka-consumer-groups --bootstrap-server kafka2:9092 --topic vehicle_dispatcher --group console1 --reset-offsets --to-earliest --execute
-sudo docker exec -it kafka1 kafka-consumer-groups --bootstrap-server kafka2:9092 --topic vehicle_dispatcher --group console1 --reset-offsets --to-latest --execute
-sudo docker exec -it kafka1 kafka-consumer-groups --bootstrap-server kafka2:9092 --topic vehicle_dispatcher --group console1 --reset-offsets --to-offset 44 --execute
+sudo docker exec -it kafka1 kafka-consumer-groups --bootstrap-server kafka2:9092 --topic data-report --group console1 --reset-offsets --to-earliest --execute
+sudo docker exec -it kafka1 kafka-consumer-groups --bootstrap-server kafka2:9092 --topic data-report --group console1 --reset-offsets --to-latest --execute
+sudo docker exec -it kafka1 kafka-consumer-groups --bootstrap-server kafka2:9092 --topic data-report --group console1 --reset-offsets --to-offset 44 --execute
 --============================消费消息 end   ============================
 --检查集群状态
 --查看所有主题的分区情况、副本情况
 sudo docker exec -it kafka1 kafka-topics --describe -bootstrap-server kafka3:9092
+sudo docker exec -it kafka1 kafka-topics --describe -bootstrap-server kafka1:9092
 --查看某个主题的分区情况、副本情况
 sudo docker exec -it kafka1 kafka-topics --describe --topic console-test-topic --bootstrap-server kafka3:9092
-sudo docker exec -it kafka1 kafka-topics --describe --topic vehicle_dispatcher --bootstrap-server kafka3:9092
+sudo docker exec -it kafka1 kafka-topics --describe --topic data-report --bootstrap-server kafka3:9092
+sudo docker exec -it kafka1 kafka-topics --describe --topic data-report --bootstrap-server kafka1:9092
 
 --错误
 Exception in thread "main" java.lang.IllegalArgumentException: requirement failed:
