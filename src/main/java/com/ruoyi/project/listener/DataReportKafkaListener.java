@@ -5,9 +5,12 @@ import com.ruoyi.common.utils.JsonUtils;
 import com.ruoyi.common.utils.LocalDateUtils;
 import com.ruoyi.project.common.cache.GlobalDeviceRealTimeCache;
 import com.ruoyi.project.device.domain.Device;
+import com.ruoyi.project.device.domain.LogDeviceOperate;
 import com.ruoyi.project.device.domain.vo.DeviceVo;
 import com.ruoyi.project.device.enums.DataReportDataType;
+import com.ruoyi.project.device.enums.OperateType;
 import com.ruoyi.project.device.service.IDeviceService;
+import com.ruoyi.project.device.service.ILogDeviceOperateService;
 import com.ruoyi.project.mqtt.bean.DataReportMsg;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +42,7 @@ public class DataReportKafkaListener {
     private String kafkaDataReportTopic;
 
     private final IDeviceService deviceService;
+    private final ILogDeviceOperateService logDeviceOperateService;
 
     /**
      * 处理事件：上报数据处理
@@ -177,7 +182,35 @@ public class DataReportKafkaListener {
 
                             GlobalDeviceRealTimeCache.put(reportMsg.getDeviceId(), cache);
 
-                            //todo 记录操作日志
+                            // 记录操作日志
+                            LogDeviceOperate exist = logDeviceOperateService.selectLastOperateByDeviceId(device.getId());
+                            if (Boolean.TRUE.equals(turnOnOrOffData.getIsOn())) {
+                                LogDeviceOperate logDeviceOperate = new LogDeviceOperate();
+                                logDeviceOperate.setUuid(turnOnOrOffData.getUuid());
+                                logDeviceOperate.setDeviceId(device.getId());
+                                logDeviceOperate.setOperator(turnOnOrOffData.getOperator());
+                                logDeviceOperate.setOperatorNo(turnOnOrOffData.getOperatorNo());
+                                logDeviceOperate.setOperateType(OperateType.turnOnOrOff.name());
+
+                                logDeviceOperate.setOperateStartTime(localDateTime);
+                                logDeviceOperate.setCreateTime(new Date());
+
+                                logDeviceOperateService.insert(logDeviceOperate);
+                            } else if (Boolean.FALSE.equals(turnOnOrOffData.getIsOn())) {
+                                if (exist != null) {
+                                    LogDeviceOperate logDeviceOperate = new LogDeviceOperate();
+                                    logDeviceOperate.setUuid(turnOnOrOffData.getUuid());
+                                    logDeviceOperate.setDeviceId(device.getId());
+                                    logDeviceOperate.setOperator(turnOnOrOffData.getOperator());
+                                    logDeviceOperate.setOperatorNo(turnOnOrOffData.getOperatorNo());
+                                    logDeviceOperate.setOperateType(OperateType.turnOnOrOff.name());
+
+                                    logDeviceOperate.setOperateEndTime(localDateTime);
+                                    logDeviceOperate.setUpdateTime(new Date());
+
+                                    logDeviceOperateService.updateById(exist.getId(), logDeviceOperate);
+                                }
+                            }
                         }
                     } catch (Exception e) {
                         log.error("consume error", e);
