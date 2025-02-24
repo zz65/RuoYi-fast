@@ -2,6 +2,7 @@ package com.ruoyi.project.device.mapper;
 
 import com.ruoyi.project.device.domain.Device;
 import com.ruoyi.project.device.domain.vo.DeviceVo;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -86,4 +87,12 @@ public interface DeviceMapper
      * @return 对象信息
      */
     Device selectById(Long id);
+
+    /**
+     * 通过id集合查询设备集合
+     * @param ids
+     * @return
+     */
+    List<Device> selectByIds(@Param("ids") List<Long> ids);
+
 }

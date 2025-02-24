@@ -57,6 +57,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		select  o.id, o.device_id, o.uuid, o.operator, o.operator_no, o.operate_start_time, o.operate_end_time, o.create_time, o.update_time from iot_log_device_operate o
 	</sql>
 
+	<select id="selectPageList" parameterType="LogDeviceOperate" resultMap="LogDeviceOperateVoResult">
+		<include refid="LogDeviceOperateSelectSql"/>
+		where operate_type='turnOnOrOff' and operate_start_time is not null
+		<if test="operator != null and operator != '' ">
+			AND o.operator LIKE CONCAT('%', #{operator}, '%')
+		</if>
+		<if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+			and date_format(o.operate_start_time,'%Y%m%d') &gt;= date_format(#{params.beginTime},'%Y%m%d')
+		</if>
+		<if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+			and date_format(o.operate_start_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d')
+		</if>
+		<!-- 数据范围过滤 -->
+		${params.dataScope}
+	</select>
+
 	<select id="selectById" parameterType="Long" resultMap="LogDeviceOperateVoResult">
 		<include refid="LogDeviceOperateSelectSql"/>
 		where d.id = #{id}

@@ -1,6 +1,9 @@
 package com.ruoyi.project.device.mapper;
 
 import com.ruoyi.project.device.domain.LogDeviceOperate;
+import com.ruoyi.project.device.domain.vo.LogDeviceOperateVo;
+
+import java.util.List;
 
 /**
  * 类的概要说明
@@ -17,6 +20,8 @@ public interface LogDeviceOperateMapper {
     int selectById(Long id);
 
     LogDeviceOperate selectLastOperateByDeviceId(Long deviceId);
+
+    List<LogDeviceOperateVo> selectPageList(LogDeviceOperate logDeviceOperate);
 
 
 }

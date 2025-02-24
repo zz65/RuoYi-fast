@@ -20,5 +20,9 @@ import java.util.Date;
  */
 @Data
 public class LogDeviceOperateVo extends LogDeviceOperate {
+    /* 设备序列号 */
+    private String deviceSn;
 
+    /* 设备名称 */
+    private String deviceName;
 }

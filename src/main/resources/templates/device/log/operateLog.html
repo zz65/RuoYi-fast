@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+	<th:block th:include="include :: header('操作日志')" />
+	<link th:href="@{/css/custom.css}" rel="stylesheet"/>
+</head>
+<body class="gray-bg">
+	<div class="container-div">
+		<div class="row">
+			<div class="col-sm-12 search-collapse">
+				<form id="device-form">
+					<div class="select-list">
+						<ul>
+							<li>
+								操作工姓名：<input type="text" name="operator"/>
+							</li>
+							<li class="select-time">
+								<label>开机时间： </label>
+								<input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginTime]"/>
+								<span>-</span>
+								<input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endTime]"/>
+							</li>
+							<li>
+								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+							    <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							</li>
+						</ul>
+					</div>
+				</form>
+			</div>
+		
+
+	        <div class="col-sm-12 select-table table-striped">
+			    <table id="bootstrap-table"></table>
+			</div>
+		</div>
+	</div>
+	<th:block th:include="include :: footer" />
+	<th:block th:include="include :: bootstrap-table-fixed-columns-js" />
+	<script th:inline="javascript">
+		var prefix = ctx + "device/log";
+		
+
+		$(function() {
+			var options = {
+				url: prefix + "/operateLogList",
+				sortName: "operateStartTime",
+				sortOrder: "desc",
+				modalName: "操作日志",
+				// fixedColumns: true,
+				// fixedNumber: 4,
+				// fixedRightNumber: 1,
+				columns: [
+					{
+						field: 'id',
+						visible: false
+					},
+					{
+						field: 'deviceSn',
+						title: '设备序列号',
+						width: 100,
+						formatter: ovverflowEllipsisToolTipFormatter,
+						class: 'ellipsis'
+					},
+					{
+						field: 'deviceName',
+						title: '设备名称',
+						width: 100,
+						formatter: ovverflowEllipsisToolTipFormatter,
+						class: 'ellipsis'
+					},
+					{
+						field: 'operator',
+						title: '焊工姓名',
+						width: 100,
+						formatter: ovverflowEllipsisToolTipFormatter,
+						class: 'ellipsis'
+					},
+					{
+						field: 'operatorNo',
+						title: '焊工工号',
+						width: 100,
+						formatter: ovverflowEllipsisToolTipFormatter,
+						class: 'ellipsis'
+					},
+					{
+						field: 'operateStartTime',
+						title: '操作开始时间',
+						sortable: true,
+						width: 140
+					},
+					{
+						field: 'operateEndTime',
+						title: '操作结束时间',
+						sortable: true,
+						width: 140
+					},
+					{
+						field: 'createTime',
+						title: '创建时间',
+						sortable: true,
+						width: 140
+					}
+					]
+			};
+			$.table.init(options);
+
+			//配合ellipsis样式，设置单元格超出列宽的内容隐藏并显示省略号
+			$("#bootstrap-table").css("table-layout", "fixed");
+			// 设置鼠标悬停展示全部内容
+			$('[data-toggle="tooltip"]').tooltip();
+		});
+
+		/**
+		 * 获取文本格式：配合ellipsis样式，设置单元格超出列宽的内容隐藏并显示省略号，鼠标悬停显示完整内容
+		 * @param val
+		 * @param rowData
+		 * @param index
+		 * @returns {string}
+		 */
+		function ovverflowEllipsisToolTipFormatter(val, rowData, index) {
+			if (val == '' || val == null) {
+				return;
+			}
+			var span = document.createElement('span');
+			span.setAttribute('title', val);
+			span.setAttribute('data-toggle', 'tooltip'); // 添加data-toggle属性,设置鼠标悬停
+			span.innerHTML = val;
+			return span.outerHTML;
+		}
+
+	</script>
+</body>
+</html>

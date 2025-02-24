@@ -98,7 +98,7 @@ public class DataReportKafkaListener {
                     if (reportMsg == null) {
                         continue;
                     }
-                    if (reportMsg.getDeviceId() == null) {
+                    if (reportMsg.getSn() == null) {
                         log.error("field deviceId missing,value:{}", value);
                         continue;
                     }
@@ -111,9 +111,9 @@ public class DataReportKafkaListener {
                         continue;
                     }
 
-                    Device device = snToDeviceMap.get(reportMsg.getDeviceId());
+                    Device device = snToDeviceMap.get(reportMsg.getSn());
                     if (device == null) {
-                        log.error("device not found,sn:{}", reportMsg.getDeviceId());
+                        log.error("device not found,sn:{}", reportMsg.getSn());
                         continue;
                     }
 
@@ -144,7 +144,7 @@ public class DataReportKafkaListener {
                             cache.setVoltage(realTimeData.getVoltage());
                             cache.setCurrent(realTimeData.getCurrent());
 
-                            GlobalDeviceRealTimeCache.put(reportMsg.getDeviceId(), cache);
+                            GlobalDeviceRealTimeCache.put(reportMsg.getSn(), cache);
                         } else if (DataReportDataType.TURN_ON_OR_OFF_DATA.getDataType().equals(reportMsg.getDataType())) {
                             DataReportMsg.TurnOnOrOffData turnOnOrOffData = null;
                             try {
@@ -180,7 +180,7 @@ public class DataReportKafkaListener {
                                 cache.setTurnOffTime(localDateTime);
                             }
 
-                            GlobalDeviceRealTimeCache.put(reportMsg.getDeviceId(), cache);
+                            GlobalDeviceRealTimeCache.put(reportMsg.getSn(), cache);
 
                             // 记录操作日志
                             LogDeviceOperate exist = logDeviceOperateService.selectLastOperateByDeviceId(device.getId());

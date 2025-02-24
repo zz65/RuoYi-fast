@@ -27,9 +27,9 @@ public class DataReportMsg implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 设备唯一标识,如sn。注意这里的deviceId是设备端传上来的，不是iot_device表的id
+     * 设备序列号
      */
-    private String deviceId;
+    private String sn;
 
     /**
      * 上传数据时的时间戳（秒）
