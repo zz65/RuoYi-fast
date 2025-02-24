@@ -1,5 +1,6 @@
 package com.ruoyi.project.device.controller;
 
+import com.ruoyi.common.utils.web.WebRequestParamUtils;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.page.TableDataInfo;
 import com.ruoyi.project.device.domain.LogDeviceOperate;
@@ -9,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -57,6 +57,10 @@ public class LogDeviceOperateController extends BaseController
     public TableDataInfo list(LogDeviceOperate logDeviceOperate)
     {
         startPage();
+
+        WebRequestParamUtils.validateDateMissing(logDeviceOperate);
+        WebRequestParamUtils.validateDateSpan(logDeviceOperate, 31);
+
         List<LogDeviceOperateVo> list = logDeviceOperateService.selectPageList(logDeviceOperate);
         return getDataTable(list);
     }

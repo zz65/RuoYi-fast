@@ -145,6 +145,19 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils
     }
 
     /**
+     * 计算相差天数
+     * @param date1 日期1，格式：yyyy-MM-dd
+     * @param date2 日期2，格式：yyyy-MM-dd
+     */
+    public static int differentDaysByDateFormatStr(String date1, String date2)
+    {
+        Date beginDate = DateUtils.parseDate(date1);
+        Date endDate = DateUtils.parseDate(date2);
+        int diffDays = differentDaysByMillisecond(beginDate, endDate);
+        return diffDays;
+    }
+
+    /**
      * 计算时间差
      *
      * @param endDate 最后时间

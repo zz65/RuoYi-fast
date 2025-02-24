@@ -12,7 +12,7 @@
 					<div class="select-list">
 						<ul>
 							<li>
-								操作工姓名：<input type="text" name="operator"/>
+								焊工姓名：<input type="text" name="operator" id="operator"/>
 							</li>
 							<li class="select-time">
 								<label>开机时间： </label>
@@ -22,7 +22,8 @@
 							</li>
 							<li>
 								<a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
-							    <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+							    <!--<a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>-->
+							    <a class="btn btn-warning btn-rounded btn-sm" onclick="reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
 							</li>
 						</ul>
 					</div>
@@ -103,6 +104,9 @@
 					}
 					]
 			};
+
+			initDate();
+
 			$.table.init(options);
 
 			//配合ellipsis样式，设置单元格超出列宽的内容隐藏并显示省略号
@@ -110,6 +114,49 @@
 			// 设置鼠标悬停展示全部内容
 			$('[data-toggle="tooltip"]').tooltip();
 		});
+
+		/**
+		 * 格式化日期，格式为 YYYY-MM-DD
+ 		 * @param date
+		 * @returns {string}
+		 */
+		function formatDate(date) {
+			var year = date.getFullYear();
+			var month = String(date.getMonth() + 1).padStart(2, '0');
+			var day = String(date.getDate()).padStart(2, '0');
+			return year + '-' + month + '-' + day;
+		}
+
+		/**
+		 * 初始化日期范围，设置为过去一周
+		 */
+		function initDate() {
+			// 获取当前日期
+			var today = new Date();
+			// 格式化当前日期为 YYYY-MM-DD 格式
+			var formattedToday = formatDate(today);
+			// 计算七天前的日期
+			var sevenDaysAgo = new Date();
+			sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+			// 格式化七天前的日期为 YYYY-MM-DD 格式
+			var formattedSevenDaysAgo = formatDate(sevenDaysAgo);
+
+			$('#startTime').val(formattedSevenDaysAgo); // 设置开始日期
+			$('#endTime').val(formattedToday); // 设置结束日期
+		}
+
+		/**
+		 * 初始化日期范围，设置为过去一周
+		 */
+		function reset() {
+			$('#operator').val(null);
+
+			initDate();
+
+			var params = $("#bootstrap-table").bootstrapTable('getOptions');
+			params.pageNumber = 1;
+			$("#bootstrap-table").bootstrapTable('refresh', params);
+		}
 
 		/**
 		 * 获取文本格式：配合ellipsis样式，设置单元格超出列宽的内容隐藏并显示省略号，鼠标悬停显示完整内容
