@@ -256,6 +256,16 @@ insert into sys_menu values('1059', '生成删除', '115', '3',  '#', '',  'F', 
 insert into sys_menu values('1060', '预览代码', '115', '4',  '#', '',  'F', '0', '1', 'tool:gen:preview',  '#', 'admin', sysdate(), '', null, '');
 insert into sys_menu values('1061', '生成代码', '115', '5',  '#', '',  'F', '0', '1', 'tool:gen:code',     '#', 'admin', sysdate(), '', null, '');
 
+-- 设备管理菜单和按钮
+INSERT INTO demo.sys_menu (menu_id, menu_name, parent_id, order_num, url, target, menu_type, visible, is_refresh, perms, icon, create_by, create_time, update_by, update_time, remark) VALUES (2000, '设备管理', 0, 0, '#', 'menuItem', 'M', '0', '1', null, 'fa fa-tasks', 'admin', '2025-02-17 15:07:30', '', null, '');
+INSERT INTO demo.sys_menu (menu_id, menu_name, parent_id, order_num, url, target, menu_type, visible, is_refresh, perms, icon, create_by, create_time, update_by, update_time, remark) VALUES (2001, '设备列表', 2000, 1, '/device/list', 'menuItem', 'C', '0', '1', 'device:list:view', '#', 'admin', '2025-02-17 15:08:27', 'admin', '2025-02-17 16:28:46', '');
+INSERT INTO demo.sys_menu (menu_id, menu_name, parent_id, order_num, url, target, menu_type, visible, is_refresh, perms, icon, create_by, create_time, update_by, update_time, remark) VALUES (2002, '设备查询', 2001, 1, '#', 'menuItem', 'F', '0', '1', 'device:list:list', '#', 'admin', '2025-02-20 09:38:50', '', null, '');
+INSERT INTO demo.sys_menu (menu_id, menu_name, parent_id, order_num, url, target, menu_type, visible, is_refresh, perms, icon, create_by, create_time, update_by, update_time, remark) VALUES (2003, '设备新增', 2001, 2, '#', 'menuItem', 'F', '0', '1', 'device:list:add', '#', 'admin', '2025-02-20 09:39:09', '', null, '');
+INSERT INTO demo.sys_menu (menu_id, menu_name, parent_id, order_num, url, target, menu_type, visible, is_refresh, perms, icon, create_by, create_time, update_by, update_time, remark) VALUES (2004, '设备删除', 2001, 3, '#', 'menuItem', 'F', '0', '1', 'device:list:remove', '#', 'admin', '2025-02-20 09:39:31', 'admin', '2025-02-20 09:39:48', '');
+INSERT INTO demo.sys_menu (menu_id, menu_name, parent_id, order_num, url, target, menu_type, visible, is_refresh, perms, icon, create_by, create_time, update_by, update_time, remark) VALUES (2005, '设备修改', 2001, 4, '#', 'menuItem', 'F', '0', '1', 'device:list:edit', '#', 'admin', '2025-02-20 09:40:18', '', null, '');
+INSERT INTO demo.sys_menu (menu_id, menu_name, parent_id, order_num, url, target, menu_type, visible, is_refresh, perms, icon, create_by, create_time, update_by, update_time, remark) VALUES (2006, '操作日志', 2000, 2, '/device/log', 'menuItem', 'C', '0', '1', 'device:log:operateLog', '#', 'admin', '2025-02-24 14:18:52', '', null, '');
+INSERT INTO demo.sys_menu (menu_id, menu_name, parent_id, order_num, url, target, menu_type, visible, is_refresh, perms, icon, create_by, create_time, update_by, update_time, remark) VALUES (2007, '日志查询', 2006, 1, '#', 'menuItem', 'F', '0', '1', 'device:log:operateLogList', '#', 'admin', '2025-02-24 14:19:18', '', null, '');
+
 
 -- ----------------------------
 -- 6、用户和角色关联表  用户N-1角色
