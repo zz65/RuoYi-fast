@@ -1,6 +1,8 @@
 package com.ruoyi.project.system.role.controller;
 
 import java.util.List;
+
+import com.ruoyi.project.device.service.IDeviceService;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -45,6 +47,9 @@ public class RoleController extends BaseController
 
     @Autowired
     private IDeptService deptService;
+
+    @Autowired
+    private IDeviceService deviceService;
 
     @RequiresPermissions("system:role:view")
     @GetMapping()
@@ -142,7 +147,7 @@ public class RoleController extends BaseController
     }
 
     /**
-     * 角色分配数据权限
+     * 角色分配数据权限(部门)
      */
     @RequiresPermissions("system:role:edit")
     @GetMapping("/authDataScope/{roleId}")
@@ -153,7 +158,19 @@ public class RoleController extends BaseController
     }
 
     /**
-     * 保存角色分配数据权限
+     * 角色分配数据权限(设备)
+     */
+    @RequiresPermissions("system:role:edit")
+    @GetMapping("/authDataScopeDevice/{roleId}")
+    public String authDataScopeDevice(@PathVariable("roleId") Long roleId, ModelMap mmap)
+    {
+        mmap.put("role", roleService.selectRoleById(roleId));
+        return prefix + "/dataScopeDevice";
+    }
+
+
+    /**
+     * 保存角色分配数据权限(部门)
      */
     @RequiresPermissions("system:role:edit")
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
@@ -164,6 +181,25 @@ public class RoleController extends BaseController
         roleService.checkRoleAllowed(role);
         roleService.checkRoleDataScope(role.getRoleId());
         if (roleService.authDataScope(role) > 0)
+        {
+            setSysUser(userService.selectUserById(getUserId()));
+            return success();
+        }
+        return error();
+    }
+
+    /**
+     * 保存角色分配数据权限(设备)
+     */
+    @RequiresPermissions("system:role:edit")
+    @Log(title = "角色管理", businessType = BusinessType.UPDATE)
+    @PostMapping("/authDataScopeDevice")
+    @ResponseBody
+    public AjaxResult authDataScopeSaveDevice(Role role)
+    {
+        roleService.checkRoleAllowed(role);
+        roleService.checkRoleDataScope(role.getRoleId());
+        if (roleService.authDataScopeDevice(role) > 0)
         {
             setSysUser(userService.selectUserById(getUserId()));
             return success();
@@ -317,6 +353,18 @@ public class RoleController extends BaseController
     public List<Ztree> deptTreeData(Role role)
     {
         List<Ztree> ztrees = deptService.roleDeptTreeData(role);
+        return ztrees;
+    }
+
+    /**
+     * 加载角色部门（数据权限-设备）列表树
+     */
+    @RequiresPermissions("system:role:edit")
+    @GetMapping("/deviceTreeData")
+    @ResponseBody
+    public List<Ztree> deviceTreeData(Role role)
+    {
+        List<Ztree> ztrees = deviceService.roleDeviceTreeData(role);
         return ztrees;
     }
 }

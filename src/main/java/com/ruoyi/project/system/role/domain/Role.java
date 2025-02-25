@@ -53,6 +53,9 @@ public class Role extends BaseEntity
     /** 部门组（数据权限） */
     private Long[] deptIds;
 
+    /** 设备组（数据权限） */
+    private Long[] deviceIds;
+
     /** 角色菜单权限 */
     private Set<String> permissions;
 
@@ -179,6 +182,14 @@ public class Role extends BaseEntity
     public void setDeptIds(Long[] deptIds)
     {
         this.deptIds = deptIds;
+    }
+
+    public Long[] getDeviceIds() {
+        return deviceIds;
+    }
+
+    public void setDeviceIds(Long[] deviceIds) {
+        this.deviceIds = deviceIds;
     }
 
     public Set<String> getPermissions()

@@ -1,6 +1,7 @@
 package com.ruoyi.project.device.service.impl;
 
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.framework.aspectj.lang.annotation.DataScopeDevice;
 import com.ruoyi.project.device.domain.Device;
 import com.ruoyi.project.device.domain.LogDeviceOperate;
 import com.ruoyi.project.device.domain.vo.LogDeviceOperateVo;
@@ -63,6 +64,7 @@ public class LogDeviceOperateServiceImpl implements ILogDeviceOperateService {
     }
 
     @Override
+    @DataScopeDevice(deviceAlias = "o", deviceIdColumnName="device_id")
     public List<LogDeviceOperateVo> selectPageList(LogDeviceOperate logDeviceOperate) {
         if (logDeviceOperate == null) {
             return null;

@@ -76,7 +76,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</resultMap>
 
 	<sql id="DeviceSelectSql">
-		select d.id, d.name, d.code, d.sn, d.first_online_time, d.status, d.create_time from iot_device d
+		select d.id, d.id as device_id, d.name, d.code, d.sn, d.first_online_time, d.status, d.create_time from iot_device d
 	</sql>
 
 	<select id="selectList" parameterType="Device" resultMap="DeviceResult">
@@ -95,7 +95,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			and date_format(d.create_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d')
 		</if>
 		<!-- 数据范围过滤 -->
-		${params.dataScope}
+		${params.dataScopeDevice}
 	</select>
 
 	<select id="selectPageList" parameterType="DeviceVo" resultMap="DeviceVoResult">
@@ -114,7 +114,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			and date_format(d.create_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d')
 		</if>
 		<!-- 数据范围过滤 -->
-		${params.dataScope}
+		${params.dataScopeDevice}
 	</select>
 
 	<select id="checkNameUnique" parameterType="String" resultMap="DeviceResult">
@@ -136,5 +136,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<foreach collection="ids" item="id" open="(" separator="," close=")">
 			#{id}
 		</foreach>
+	</select>
+
+
+	<select id="selectRoleDeviceTree" parameterType="Long" resultType="String">
+		select concat(d.id, d.name) as device_name
+		from iot_device d
+				 left join iot_role_device rd on d.id = rd.device_id
+		where d.del_flag = '0' and rd.role_id = #{roleId}
+		order by d.id
 	</select>
 </mapper> 

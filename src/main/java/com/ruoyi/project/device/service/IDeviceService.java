@@ -1,7 +1,10 @@
 package com.ruoyi.project.device.service;
 
+import com.ruoyi.framework.aspectj.lang.annotation.DataScopeDevice;
+import com.ruoyi.framework.web.domain.Ztree;
 import com.ruoyi.project.device.domain.Device;
 import com.ruoyi.project.device.domain.vo.DeviceVo;
+import com.ruoyi.project.system.role.domain.Role;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -56,7 +59,15 @@ public interface IDeviceService {
     boolean changeStatus(Long id, String status);
 
     /**
-     * 查询集合
+     * 查询集合（不带数据权限）
+     *
+     * @param  device
+     * @return 集合
+     */
+    List<Device> selectListWithoutDataScope(Device device);
+
+    /**
+     * 查询集合（带数据权限）
      *
      * @param  device
      * @return 集合
@@ -100,4 +111,12 @@ public interface IDeviceService {
      * @return
      */
     boolean isOnline(LocalDateTime lastHeartbeatTime);
+
+
+    /**
+     * 根据角色ID查询设备树信息
+     * @param role
+     * @return
+     */
+    List<Ztree> roleDeviceTreeData(Role role);
 }

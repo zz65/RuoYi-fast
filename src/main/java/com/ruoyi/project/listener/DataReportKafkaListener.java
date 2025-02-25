@@ -66,7 +66,7 @@ public class DataReportKafkaListener {
             if (consumerRecords != null && !consumerRecords.isEmpty()) {
                 Device param = new Device();
                 param.setStatus(Constants.NORMAL);
-                List<Device> devices = deviceService.selectList(param);
+                List<Device> devices = deviceService.selectListWithoutDataScope(param);
                 //key=sn, value=device
                 Map<String, Device> snToDeviceMap = new HashMap<>();
                 if (!CollectionUtils.isEmpty(devices)) {

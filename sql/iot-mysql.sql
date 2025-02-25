@@ -265,6 +265,9 @@ INSERT INTO demo.sys_menu (menu_id, menu_name, parent_id, order_num, url, target
 INSERT INTO demo.sys_menu (menu_id, menu_name, parent_id, order_num, url, target, menu_type, visible, is_refresh, perms, icon, create_by, create_time, update_by, update_time, remark) VALUES (2005, '设备修改', 2001, 4, '#', 'menuItem', 'F', '0', '1', 'device:list:edit', '#', 'admin', '2025-02-20 09:40:18', '', null, '');
 INSERT INTO demo.sys_menu (menu_id, menu_name, parent_id, order_num, url, target, menu_type, visible, is_refresh, perms, icon, create_by, create_time, update_by, update_time, remark) VALUES (2006, '操作日志', 2000, 2, '/device/log', 'menuItem', 'C', '0', '1', 'device:log:operateLog', '#', 'admin', '2025-02-24 14:18:52', '', null, '');
 INSERT INTO demo.sys_menu (menu_id, menu_name, parent_id, order_num, url, target, menu_type, visible, is_refresh, perms, icon, create_by, create_time, update_by, update_time, remark) VALUES (2007, '日志查询', 2006, 1, '#', 'menuItem', 'F', '0', '1', 'device:log:operateLogList', '#', 'admin', '2025-02-24 14:19:18', '', null, '');
+INSERT INTO demo.sys_menu (menu_id, menu_name, parent_id, order_num, url, target, menu_type, visible, is_refresh, perms, icon, create_by, create_time, update_by, update_time, remark) VALUES (2011, '首页统计设备数量', 0, 0, '#', 'menuItem', 'F', '0', '1', 'homePage:device:statisticsOnlineStatus', '#', 'admin', '2025-02-25 16:19:54', '', null, '');
+INSERT INTO demo.sys_menu (menu_id, menu_name, parent_id, order_num, url, target, menu_type, visible, is_refresh, perms, icon, create_by, create_time, update_by, update_time, remark) VALUES (2012, '首页实时设备列表', 0, 0, '#', 'menuItem', 'F', '0', '1', 'homePage:device:realTimeDataList', '#', 'admin', '2025-02-25 16:20:28', '', null, '');
+
 
 
 -- ----------------------------
@@ -923,11 +926,10 @@ DROP TABLE IF EXISTS iot_log_device_operate;
 
 -- 数据权限表-角色和设备关联表
 CREATE TABLE IF NOT EXISTS iot_role_device (
-  id                 bigint          not null  auto_increment comment '主键',
   -- tenant_id          varchar(20)                       not null  comment '租户编号', -- 演示暂时不用，正式版本再加
   role_id            bigint          not null                 comment '角色id',
   device_id          bigint          not null                 comment '设备id',
-  PRIMARY KEY (id)
+  PRIMARY KEY (role_id, device_id)
 ) engine=innodb comment = '数据权限表-角色和设备关联表';
 
 -- 设备表

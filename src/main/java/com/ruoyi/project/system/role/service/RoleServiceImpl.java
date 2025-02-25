@@ -5,6 +5,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.ruoyi.project.device.domain.RoleDevice;
+import com.ruoyi.project.device.mapper.RoleDeviceMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +47,9 @@ public class RoleServiceImpl implements IRoleService
 
     @Autowired
     private RoleDeptMapper roleDeptMapper;
+
+    @Autowired
+    private RoleDeviceMapper roleDeviceMapper;
 
     /**
      * 根据条件分页查询角色数据
@@ -213,7 +219,7 @@ public class RoleServiceImpl implements IRoleService
      * @return 结果
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Throwable.class)
     public int authDataScope(Role role)
     {
         role.setUpdateBy(ShiroUtils.getLoginName());
@@ -222,7 +228,27 @@ public class RoleServiceImpl implements IRoleService
         // 删除角色与部门关联
         roleDeptMapper.deleteRoleDeptByRoleId(role.getRoleId());
         // 新增角色和部门信息（数据权限）
-        return insertRoleDept(role);
+        int rows = insertRoleDept(role);
+        if (rows < 0) {
+            throw new ServiceException("修改数据权限-设备信息,请联系管理员");
+        }
+        return rows;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Throwable.class)
+    public int authDataScopeDevice(Role role) {
+        role.setUpdateBy(ShiroUtils.getLoginName());
+        // 修改角色信息
+        roleMapper.updateRole(role);
+        // 删除角色与设备关联
+        roleDeviceMapper.deleteRoleDeviceByRoleId(role.getRoleId());
+        // 新增角色和设备信息（数据权限）
+        int rows = insertRoleDevice(role);
+        if (rows < 0) {
+            throw new ServiceException("修改数据权限-设备信息,请联系管理员");
+        }
+        return rows;
     }
 
     /**
@@ -269,6 +295,30 @@ public class RoleServiceImpl implements IRoleService
         if (list.size() > 0)
         {
             rows = roleDeptMapper.batchRoleDept(list);
+        }
+        return rows;
+    }
+
+    /**
+     * 新增角色设备信息(数据权限)
+     *
+     * @param role 角色对象
+     */
+    public int insertRoleDevice(Role role)
+    {
+        int rows = 1;
+        // 新增角色与部门（数据权限）管理
+        List<RoleDevice> list = new ArrayList<RoleDevice>();
+        for (Long deviceId : role.getDeviceIds())
+        {
+            RoleDevice rd = new RoleDevice();
+            rd.setRoleId(role.getRoleId());
+            rd.setDeviceId(deviceId);
+            list.add(rd);
+        }
+        if (list.size() > 0)
+        {
+            rows = roleDeviceMapper.batchRoleDevice(list);
         }
         return rows;
     }

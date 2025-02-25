@@ -39,7 +39,7 @@ public class HomePageController extends BaseController
      * 统计设备在线状态：总数、在线数、离线数
      * @return
      */
-    // @RequiresPermissions("homePage:device:statisticsOnlineStatus")
+    @RequiresPermissions("homePage:device:statisticsOnlineStatus")
     @PostMapping("/statisticsOnlineStatus")
     @ResponseBody
     public DeviceOnlineStatusStatisticsVo statisticsOnlineStatus()
@@ -75,7 +75,7 @@ public class HomePageController extends BaseController
      * 分页查询实时数据列表
      * @return
      */
-    // @RequiresPermissions("homePage:device:realTimeDataList")
+    @RequiresPermissions("homePage:device:realTimeDataList")
     @PostMapping("/realTimeDataList")
     @ResponseBody
     public TableDataInfo realTimeDataList()

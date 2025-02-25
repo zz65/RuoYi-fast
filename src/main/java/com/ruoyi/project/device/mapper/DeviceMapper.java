@@ -95,4 +95,12 @@ public interface DeviceMapper
      */
     List<Device> selectByIds(@Param("ids") List<Long> ids);
 
+    /**
+     * 根据角色ID查询设备
+     *
+     * @param roleId 角色ID
+     * @return 设备列表
+     */
+    List<String> selectRoleDeviceTree(Long roleId);
+
 }

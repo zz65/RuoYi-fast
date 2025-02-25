@@ -70,7 +70,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			and date_format(o.operate_start_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d')
 		</if>
 		<!-- 数据范围过滤 -->
-		${params.dataScope}
+		${params.dataScopeDevice}
 	</select>
 
 	<select id="selectById" parameterType="Long" resultMap="LogDeviceOperateVoResult">

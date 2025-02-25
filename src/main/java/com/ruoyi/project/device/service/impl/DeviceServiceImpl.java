@@ -8,12 +8,15 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.security.ShiroUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.common.utils.text.Convert;
+import com.ruoyi.framework.aspectj.lang.annotation.DataScopeDevice;
+import com.ruoyi.framework.web.domain.Ztree;
 import com.ruoyi.project.common.cache.GlobalDeviceRealTimeCache;
 import com.ruoyi.project.device.domain.Device;
 import com.ruoyi.project.device.domain.vo.DeviceVo;
 import com.ruoyi.project.device.enums.OnlineState;
 import com.ruoyi.project.device.mapper.DeviceMapper;
 import com.ruoyi.project.device.service.IDeviceService;
+import com.ruoyi.project.system.dept.domain.Dept;
 import com.ruoyi.project.system.role.domain.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -108,6 +112,12 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
+    public List<Device> selectListWithoutDataScope(Device device) {
+        return selectList(device);
+    }
+
+    @Override
+    @DataScopeDevice(deviceAlias = "d", deviceIdColumnName="id")
     public List<Device> selectList(Device device) {
         if (device == null) {
             return null;
@@ -117,6 +127,7 @@ public class DeviceServiceImpl implements IDeviceService {
     }
 
     @Override
+    @DataScopeDevice(deviceAlias = "d", deviceIdColumnName="id")
     public List<DeviceVo> selectPageList(Device device) {
         if (device == null) {
             return null;
@@ -199,5 +210,61 @@ public class DeviceServiceImpl implements IDeviceService {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 根据角色ID查询部门（数据权限）
+     *
+     * @param role 角色对象
+     * @return 部门列表（数据权限）
+     */
+    @Override
+    public List<Ztree> roleDeviceTreeData(Role role)
+    {
+        Long roleId = role.getRoleId();
+        List<Ztree> ztrees = new ArrayList<Ztree>();
+        List<Device> deviceList = SpringUtils.getAopProxy(this).selectList(new Device());
+        if (StringUtils.isNotNull(roleId))
+        {
+            List<String> roleDeviceList = deviceMapper.selectRoleDeviceTree(roleId);
+            ztrees = initZtree(deviceList, roleDeviceList);
+        }
+        else
+        {
+            ztrees = initZtree(deviceList, null);
+        }
+        return ztrees;
+    }
+
+
+    /**
+     * 对象转设备树
+     *
+     * @param deviceList 设备列表
+     * @param roleDeviceList 角色已存在菜单列表
+     * @return 树结构列表
+     */
+    public List<Ztree> initZtree(List<Device> deviceList, List<String> roleDeviceList)
+    {
+        List<Ztree> ztrees = new ArrayList<Ztree>();
+        boolean isCheck = StringUtils.isNotNull(roleDeviceList);
+        for (Device device : deviceList)
+        {
+            if (Constants.NORMAL.equals(device.getStatus()))
+            {
+                Ztree ztree = new Ztree();
+                ztree.setId(device.getId());
+                // ztree.setpId(device.getParentId());
+                ztree.setpId(0L);
+                ztree.setName(device.getName());
+                ztree.setTitle(device.getName());
+                if (isCheck)
+                {
+                    ztree.setChecked(roleDeviceList.contains(device.getId() + device.getName()));
+                }
+                ztrees.add(ztree);
+            }
+        }
+        return ztrees;
     }
 }
